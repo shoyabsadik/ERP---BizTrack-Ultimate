@@ -2,7 +2,7 @@
 
 A fully offline, browser-based ERP dashboard designed for finance tracking, transaction management, business analytics, and reporting — all inside a single HTML file.
 
-========================================================================================================================================
+=======================================================================
 # 👨‍💻 Author
 
 ## M. Shoyab Sadik
@@ -10,7 +10,7 @@ A fully offline, browser-based ERP dashboard designed for finance tracking, tran
 📞 WhatsApp: +8801575317604
 🔗 LinkedIn: https://www.linkedin.com/in/shoyabsadik/
 
-========================================================================================================================================
+========================================================================
 
 ## ✨ Core Features
 
