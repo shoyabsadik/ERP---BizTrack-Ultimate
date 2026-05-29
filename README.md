@@ -7,7 +7,9 @@ A fully offline, browser-based ERP dashboard designed for finance tracking, tran
 
 ## M. Shoyab Sadik
 🌐 Portfolio: https://shoyabsadik.github.io/
+
 📞 WhatsApp: +8801575317604
+
 🔗 LinkedIn: https://www.linkedin.com/in/shoyabsadik/
 
 ---
