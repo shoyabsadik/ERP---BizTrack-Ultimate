@@ -178,4 +178,4 @@ Each ERP file instance has:
 
 ---
 ## ✨Special Credit: 
-For Explainatoion: ## Claude AI
+For Explainatoion: Claude AI
