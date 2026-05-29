@@ -1,0 +1,2262 @@
+<html lang="en"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BizTrack Ultimate ERP</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DESIGN SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+:root {
+  --bg:     #060810;
+  --bg2:    #090c16;
+  --sf:     #0c1120;
+  --sf2:    #101828;
+  --sf3:    #141e32;
+  --bd:     #182040;
+  --bd2:    #1e2a50;
+
+  --gr: #00d4a4;  /* green  */
+  --bl: #3d8bff;  /* blue   */
+  --yw: #f5a200;  /* amber  */
+  --rd: #ff4040;  /* red    */
+  --pu: #9d5fff;  /* purple */
+  --cy: #00b8d9;  /* cyan   */
+  --pk: #ff6ba8;  /* pink   */
+  --or: #ff7020;  /* orange */
+  --tl: #1ac99a;  /* teal   */
+  --lm: #c8f544;  /* lime   */
+
+  --tx:  #cdd8f0;
+  --mu:  #3d4f72;
+  --dim: #1a2540;
+
+  --fn: 'Inter', sans-serif;
+  --mo: 'JetBrains Mono', monospace;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--tx);
+  font-family: var(--fn);
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 13px;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 800px 400px at 20% 0%, rgba(0,212,164,.04) 0%, transparent 70%),
+    radial-gradient(ellipse 600px 300px at 80% 100%, rgba(61,139,255,.03) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+.wrap { max-width: 1600px; margin: 0 auto; padding: 0 16px; position: relative; z-index: 1; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 2px; }
+
+/* No spinners */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+input[type=date]::-webkit-calendar-picker-indicator { filter: invert(.3); cursor: pointer; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOPBAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.topbar {
+  border-bottom: 1px solid var(--bd);
+  padding: 13px 0;
+  position: sticky; top: 0;
+  background: rgba(6,8,16,.95);
+  backdrop-filter: blur(16px);
+  z-index: 300;
+  margin-bottom: 18px;
+}
+.tb { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-icon {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--gr), #00a882);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(0,212,164,.3);
+}
+.brand-text h1 { font-size: 16px; font-weight: 800; letter-spacing: -.4px; }
+.brand-text h1 span { color: var(--gr); }
+.brand-text p { font-size: 9px; color: var(--mu); letter-spacing: 1.5px; text-transform: uppercase; font-family: var(--mo); }
+
+.tb-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   BUTTONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 13px; border-radius: 7px; border: none;
+  cursor: pointer; font-family: var(--fn); font-weight: 600;
+  font-size: 11px; transition: all .16s; white-space: nowrap;
+}
+.btn-gr  { background: var(--gr); color: #041a10; }
+.btn-gr:hover { background: #00edba; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,212,164,.3); }
+.btn-bl  { background: rgba(61,139,255,.12); border: 1px solid rgba(61,139,255,.28); color: var(--bl); }
+.btn-bl:hover { background: rgba(61,139,255,.22); }
+.btn-yw  { background: rgba(245,162,0,.11); border: 1px solid rgba(245,162,0,.27); color: var(--yw); }
+.btn-yw:hover { background: rgba(245,162,0,.2); }
+.btn-rd  { background: rgba(255,64,64,.09); border: 1px solid rgba(255,64,64,.22); color: var(--rd); }
+.btn-rd:hover { background: rgba(255,64,64,.18); }
+.btn-pu  { background: rgba(157,95,255,.11); border: 1px solid rgba(157,95,255,.27); color: var(--pu); }
+.btn-pu:hover { background: rgba(157,95,255,.2); }
+.btn-ghost { background: transparent; border: 1px solid var(--bd); color: var(--mu); }
+.btn-ghost:hover { border-color: var(--rd); color: var(--rd); }
+.btn-sm { padding: 4px 9px; font-size: 10px; }
+.btn-icon { width: 28px; height: 28px; padding: 0; border-radius: 6px; justify-content: center; font-size: 12px; }
+
+/* Export dropdown */
+.export-wrap { position: relative; }
+.export-dropdown {
+  position: absolute; top: calc(100% + 6px); right: 0;
+  background: var(--sf2); border: 1px solid var(--bd2);
+  border-radius: 10px; padding: 6px;
+  display: none; flex-direction: column; gap: 4px;
+  min-width: 170px; z-index: 500;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+}
+.export-dropdown.open { display: flex; }
+.export-dropdown .btn { justify-content: flex-start; text-align: left; }
+
+/* Badge */
+.bdg { font-family: var(--mo); font-size: 9px; padding: 3px 9px; background: var(--sf); border: 1px solid var(--bd); border-radius: 20px; color: var(--mu); }
+.bdg strong { color: var(--gr); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DATE FILTER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.filter-bar {
+  background: var(--sf); border: 1px solid var(--bd); border-radius: 11px;
+  padding: 10px 16px; margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.filter-bar label { font-family: var(--mo); font-size: 9px; color: var(--mu); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+.filter-bar input[type=date] {
+  background: var(--sf2); border: 1px solid var(--bd); border-radius: 7px;
+  padding: 5px 9px; color: var(--tx); font-family: var(--mo); font-size: 11px;
+  transition: border-color .18s;
+}
+.filter-bar input[type=date]:focus { outline: none; border-color: var(--gr); }
+.f-sep { color: var(--mu); font-family: var(--mo); font-size: 10px; }
+.f-chip {
+  display: none; align-items: center; gap: 4px;
+  font-family: var(--mo); font-size: 9px;
+  padding: 3px 8px; border-radius: 10px;
+  background: rgba(0,212,164,.09); border: 1px solid rgba(0,212,164,.22); color: var(--gr);
+}
+.f-chip.on { display: inline-flex; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DASHBOARD CARDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+/* Large cards row */
+.large-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+@media(max-width:1100px) { .large-cards { grid-template-columns: repeat(3, 1fr); } }
+@media(max-width:700px)  { .large-cards { grid-template-columns: repeat(2, 1fr); } }
+@media(max-width:430px)  { .large-cards { grid-template-columns: 1fr; } }
+
+.lcard {
+  background: var(--sf); border: 1px solid var(--bd);
+  border-radius: 14px; padding: 18px 16px;
+  position: relative; overflow: hidden;
+  transition: transform .18s, box-shadow .18s;
+}
+.lcard:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+.lcard::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--lca, var(--gr)); }
+.lcard::after { content: ''; position: absolute; bottom: -20px; right: -20px; width: 70px; height: 70px; border-radius: 50%; background: var(--lca, var(--gr)); opacity: .05; filter: blur(16px); }
+.lc-icon { font-size: 22px; margin-bottom: 10px; display: block; }
+.lc-label { font-size: 9px; color: var(--mu); text-transform: uppercase; letter-spacing: 1.5px; font-family: var(--mo); margin-bottom: 6px; }
+.lc-val { font-size: 22px; font-weight: 800; color: var(--lca, var(--gr)); font-family: var(--mo); line-height: 1; word-break: break-all; }
+.lc-sub { font-size: 9px; color: var(--mu); margin-top: 5px; font-family: var(--mo); }
+
+/* Small cards row */
+.small-cards {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+@media(max-width:1200px) { .small-cards { grid-template-columns: repeat(4, 1fr); } }
+@media(max-width:700px)  { .small-cards { grid-template-columns: repeat(2, 1fr); } }
+
+.scard {
+  background: var(--sf2); border: 1px solid var(--bd); border-radius: 11px;
+  padding: 12px 13px; position: relative; overflow: hidden;
+  transition: transform .18s;
+}
+.scard:hover { transform: translateY(-1px); }
+.scard::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--sca, var(--gr)); }
+.sc-label { font-size: 8px; color: var(--mu); text-transform: uppercase; letter-spacing: 1.5px; font-family: var(--mo); margin-bottom: 4px; }
+.sc-val { font-size: 13px; font-weight: 700; color: var(--sca, var(--gr)); font-family: var(--mo); word-break: break-all; line-height: 1.2; }
+.sc-sub { font-size: 8px; color: var(--mu); margin-top: 3px; font-family: var(--mo); }
+
+/* Grand Total highlight */
+.grand-card {
+  background: linear-gradient(135deg, rgba(0,212,164,.08), rgba(61,139,255,.05));
+  border: 1px solid rgba(0,212,164,.3);
+  border-radius: 14px; padding: 20px 24px; margin-bottom: 18px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+  position: relative; overflow: hidden;
+}
+.grand-card::before {
+  content: ''; position: absolute; top: -40px; right: -40px;
+  width: 160px; height: 160px; border-radius: 50%;
+  background: var(--gr); opacity: .04; filter: blur(30px);
+}
+.gc-left .gc-label { font-size: 10px; color: var(--mu); font-family: var(--mo); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px; }
+.gc-left .gc-title { font-size: 11px; font-weight: 600; color: var(--gr); margin-bottom: 6px; }
+.gc-left .gc-val { font-size: 38px; font-weight: 800; font-family: var(--mo); letter-spacing: -1.5px; color: var(--gr); }
+.gc-left .gc-sub { font-size: 9px; color: var(--mu); font-family: var(--mo); margin-top: 4px; }
+.gc-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+.gc-stat { display: flex; flex-direction: column; gap: 3px; }
+.gc-stat-label { font-size: 8px; color: var(--mu); font-family: var(--mo); text-transform: uppercase; letter-spacing: 1px; }
+.gc-stat-val { font-size: 14px; font-weight: 700; font-family: var(--mo); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   PANEL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.panel {
+  background: var(--sf); border: 1px solid var(--bd);
+  border-radius: 14px; padding: 18px; margin-bottom: 16px;
+}
+.panel-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+}
+.panel-title {
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+}
+.panel-title .sub { font-size: 9px; color: var(--mu); font-weight: 400; font-family: var(--mo); }
+.ptag {
+  font-size: 8px; font-family: var(--mo); padding: 2px 7px;
+  border-radius: 8px; border: 1px solid;
+}
+.ptag-r { color: var(--rd); border-color: rgba(255,64,64,.3); background: rgba(255,64,64,.07); }
+.ptag-g { color: var(--gr); border-color: rgba(0,212,164,.3); background: rgba(0,212,164,.07); }
+
+.sdiv {
+  display: flex; align-items: center; gap: 8px; margin: 12px 0;
+}
+.sdiv span { font-size: 8px; color: var(--mu); font-family: var(--mo); text-transform: uppercase; letter-spacing: 1.5px; white-space: nowrap; }
+.sdiv::before, .sdiv::after { content: ''; flex: 1; height: 1px; background: var(--bd); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   FORM ELEMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.fg { display: flex; flex-direction: column; gap: 4px; }
+.fg label {
+  font-size: 9px; color: var(--mu); font-family: var(--mo);
+  letter-spacing: .3px; display: flex; align-items: center; gap: 3px;
+}
+.fg label .req { color: var(--rd); font-size: 11px; }
+.fg label .opt { opacity: .45; font-size: 8px; }
+
+.fi {
+  background: var(--sf2); border: 1px solid var(--bd); border-radius: 8px;
+  padding: 8px 11px; color: var(--tx); font-family: var(--mo); font-size: 12px;
+  width: 100%; transition: border-color .18s, box-shadow .18s;
+}
+.fi:focus { outline: none; border-color: var(--gr); box-shadow: 0 0 0 3px rgba(0,212,164,.08); }
+.fi::placeholder { color: var(--mu); }
+.fi.err { border-color: var(--rd); box-shadow: 0 0 0 3px rgba(255,64,64,.08); }
+.fi.edit-hi { border-color: var(--yw); box-shadow: 0 0 0 3px rgba(245,162,0,.08); }
+
+.ferr { font-size: 8px; color: var(--rd); font-family: var(--mo); display: none; margin-top: 1px; }
+.ferr.on { display: block; }
+
+/* grid helpers */
+.g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.g3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.g4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 10px; }
+.g5 { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin-bottom: 10px; }
+@media(max-width:1000px) { .g4,.g5 { grid-template-columns: 1fr 1fr 1fr; } }
+@media(max-width:800px)  { .g3,.g4,.g5 { grid-template-columns: 1fr 1fr; } }
+@media(max-width:500px)  { .g2,.g3,.g4,.g5 { grid-template-columns: 1fr; } }
+
+/* sub-partition */
+.subp {
+  background: var(--sf3); border: 1px solid var(--bd2);
+  border-radius: 9px; padding: 10px 12px; margin-top: 2px;
+}
+.subp-label {
+  font-size: 7px; color: var(--mu); font-family: var(--mo);
+  text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.subp-label::after { content: ''; flex: 1; height: 1px; background: var(--bd); }
+.sp2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sp3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+/* validation box */
+.vbox {
+  background: rgba(255,64,64,.06); border: 1px solid rgba(255,64,64,.18);
+  border-radius: 8px; padding: 8px 12px; font-family: var(--mo); font-size: 10px;
+  color: var(--rd); margin-bottom: 10px; line-height: 1.7; display: none;
+}
+.vbox.on { display: block; }
+
+/* edit banner */
+.edit-banner {
+  background: rgba(245,162,0,.06); border: 1px solid rgba(245,162,0,.24);
+  border-radius: 8px; padding: 7px 12px; font-family: var(--mo); font-size: 10px;
+  color: var(--yw); margin-bottom: 10px; display: none;
+}
+.edit-banner.on { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+/* live preview bar */
+.prev-bar {
+  background: var(--sf2); border: 1px solid var(--bd); border-radius: 8px;
+  padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 0;
+  margin-bottom: 12px; overflow: hidden;
+}
+.pi { display: flex; flex-direction: column; gap: 2px; padding: 4px 12px; border-right: 1px solid var(--bd); }
+.pi:first-child { padding-left: 2px; }
+.pi:last-child { border-right: none; }
+.pi-l { font-size: 7px; color: var(--mu); letter-spacing: 1.2px; text-transform: uppercase; font-family: var(--mo); }
+.pi-v { font-size: 11px; font-weight: 500; color: var(--tx); font-family: var(--mo); }
+@media(max-width:700px) { .pi { border-right: none; border-bottom: 1px solid var(--bd); padding: 6px 2px; } }
+.c-gr { color: var(--gr) !important; } .c-rd { color: var(--rd) !important; } .c-yw { color: var(--yw) !important; }
+.c-bl { color: var(--bl) !important; } .c-pu { color: var(--pu) !important; } .c-cy { color: var(--cy) !important; }
+.c-pk { color: var(--pk) !important; } .c-or { color: var(--or) !important; } .c-tl { color: var(--tl) !important; }
+
+/* fund slider */
+.sl-w { margin-top: 5px; }
+.sl-w input[type=range] {
+  -webkit-appearance: none; width: 100%; height: 3px; border-radius: 3px; outline: none; cursor: pointer;
+  background: linear-gradient(to right, var(--cy) 0%, var(--cy) var(--pct,0%), var(--bd) var(--pct,0%), var(--bd) 100%);
+}
+.sl-w input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--cy); border: 2px solid var(--bg); cursor: pointer;
+  box-shadow: 0 0 5px rgba(0,184,217,.4);
+}
+.sl-l { display: flex; justify-content: space-between; font-family: var(--mo); font-size: 7px; color: var(--mu); margin-top: 2px; }
+
+.fr { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TABLE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.tw { overflow-x: auto; margin-top: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 10px; }
+thead tr { border-bottom: 1px solid var(--bd); }
+th {
+  padding: 7px 9px; text-align: left; font-family: var(--mo);
+  font-size: 7px; color: var(--mu); text-transform: uppercase;
+  letter-spacing: 1.5px; white-space: nowrap;
+}
+td {
+  padding: 9px 9px; font-family: var(--mo); font-size: 10px;
+  border-bottom: 1px solid rgba(24,32,64,.5); white-space: nowrap;
+}
+tbody tr { transition: background .13s; }
+tbody tr:hover { background: var(--sf2); }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr.ed-row { background: rgba(245,162,0,.03); outline: 1px solid rgba(245,162,0,.18); }
+.td-dim { color: var(--mu); font-size: 9px; }
+.td-gr{color:var(--gr);} .td-bl{color:var(--bl);} .td-yw{color:var(--yw);}
+.td-rd{color:var(--rd);} .td-pu{color:var(--pu);} .td-cy{color:var(--cy);}
+.td-pk{color:var(--pk);} .td-or{color:var(--or);} .td-tl{color:var(--tl);}
+.fw6{font-weight:600;} .pos{color:var(--gr);} .neg{color:var(--rd);}
+
+.dbt { background:none;border:1px solid rgba(255,64,64,.18);color:var(--rd);border-radius:4px;padding:2px 6px;cursor:pointer;font-size:9px;transition:all .15s;font-family:var(--mo); }
+.dbt:hover { background: rgba(255,64,64,.1); }
+.ebt { background:none;border:1px solid rgba(245,162,0,.18);color:var(--yw);border-radius:4px;padding:2px 6px;cursor:pointer;font-size:9px;transition:all .15s;font-family:var(--mo); }
+.ebt:hover { background: rgba(245,162,0,.1); }
+
+.empty-r { text-align: center; padding: 28px; color: var(--mu); font-family: var(--mo); font-size: 11px; }
+.empty-r .ei { font-size: 20px; margin-bottom: 6px; display: block; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   EXPENSE CATEGORY CARDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.cat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 12px; }
+@media(max-width:900px) { .cat-grid { grid-template-columns: repeat(2,1fr); } }
+.cat-c {
+  background: var(--sf2); border: 1px solid var(--bd); border-radius: 9px;
+  padding: 10px 12px; position: relative; overflow: hidden;
+}
+.cat-c::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--cc, var(--rd)); }
+.cat-n { font-size: 8px; color: var(--mu); font-family: var(--mo); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+.cat-v { font-size: 12px; font-weight: 700; color: var(--cc, var(--rd)); font-family: var(--mo); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   LOG ITEMS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.log-wrap { max-height: 200px; overflow-y: auto; padding-right: 2px; }
+.log-list { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+.li {
+  display: flex; align-items: center; gap: 7px;
+  background: var(--sf2); border: 1px solid var(--bd); border-radius: 7px;
+  padding: 7px 10px; font-family: var(--mo); font-size: 10px;
+  animation: fadeUp .2s ease;
+}
+.li-name { flex: 1; color: var(--tx); min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.li-date { font-size: 8px; color: var(--mu); flex-shrink: 0; }
+.li-amt { white-space: nowrap; font-weight: 600; flex-shrink: 0; }
+.li-cat { font-size: 8px; padding: 1px 5px; border-radius: 4px; flex-shrink: 0; }
+.li-acts { display: flex; gap: 3px; flex-shrink: 0; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CHARTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.charts-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; margin-bottom: 18px; }
+@media(max-width:860px) { .charts-grid { grid-template-columns: 1fr; } }
+.cc { background: var(--sf); border: 1px solid var(--bd); border-radius: 12px; padding: 16px; }
+.cc.fw { grid-column: 1/-1; }
+.cc-h { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cc-t { font-size: 10px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+.cc-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--dc, var(--gr)); }
+.cw { position: relative; height: 175px; }
+.cw.tall { height: 235px; }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   TOAST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+.toast {
+  position: fixed; bottom: 18px; right: 18px;
+  padding: 9px 14px; border-radius: 9px;
+  font-family: var(--mo); font-size: 10px; z-index: 9999;
+  transform: translateY(60px); opacity: 0; transition: all .25s ease;
+  display: flex; align-items: center; gap: 6px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5);
+  background: var(--sf2); border: 1px solid var(--gr); color: var(--gr);
+}
+.toast.on { transform: translateY(0); opacity: 1; }
+.toast.te { border-color: var(--rd); color: var(--rd); }
+.toast.tw { border-color: var(--yw); color: var(--yw); }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MISC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@keyframes fadeUp { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+.fade-in { animation: fadeUp .28s ease both; }
+select.fi { cursor: pointer; }
+.prev-bal-panel { display: flex; align-items: center; gap: 10px; background: var(--sf2); border: 1px solid var(--bd); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; flex-wrap: wrap; }
+.prev-bal-panel label { font-family: var(--mo); font-size: 9px; color: var(--mu); white-space: nowrap; text-transform: uppercase; letter-spacing: 1px; }
+.prev-bal-panel input { max-width: 200px; margin-bottom: 0; }
+
+footer { border-top: 1px solid var(--bd); padding: 14px 0; text-align: center; font-family: var(--mo); font-size: 9px; color: var(--mu); margin-top: 8px; }
+</style>
+</head>
+<body>
+<div id="toast" class="toast on">PDF exported successfully</div>
+
+<!-- ═══ TOPBAR ═══ -->
+<div class="topbar">
+  <div class="wrap">
+    <div class="tb">
+      <div class="brand">
+        <div class="brand-icon">📊</div>
+        <div class="brand-text">
+          <h1>Biz<span>Track</span> Ultimate</h1>
+          <p>ERP Finance &amp; Business Management System &nbsp;·&nbsp;
+            <a href="https://shoyabsadik.github.io/" target="_blank" style="color:var(--gr);text-decoration:none;font-family:var(--mo);font-size:9px;letter-spacing:1px;">
+              Designed by M. Shoyab Sadik ↗
+            </a>
+          </p>
+        </div>
+      </div>
+      <div class="tb-right">
+        <div class="bdg">Records: <strong id="entryCount">3</strong></div>
+        <button class="btn btn-ghost" onclick="deleteLast()">⟵ Del Last</button>
+        <div class="export-wrap">
+          <button class="btn btn-bl" onclick="toggleExport(event)">📤 Export ▾</button>
+          <div class="export-dropdown" id="exportDrop">
+            <button class="btn btn-pu" onclick="exportPDF();closeExport()">📄 Export PDF (Bank Statement)</button>
+            <button class="btn btn-gr" onclick="exportExcel();closeExport()">📊 Export Excel (5 Sheets)</button>
+          </div>
+        </div>
+        <button class="btn btn-pu" onclick="cloneAsNewInstance()" title="Open this file as a fresh independent ERP in a new tab">🆕 New Instance</button>
+        <button class="btn btn-rd" onclick="confirmReset()">⊗ Reset All</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+
+<!-- ═══ DATE FILTER ═══ -->
+<div class="filter-bar fade-in">
+  <label>📅 Period:</label>
+  <input type="date" id="fFrom" onchange="applyFilter()">
+  <span class="f-sep">→</span>
+  <input type="date" id="fTo" onchange="applyFilter()">
+  <button class="btn btn-ghost btn-sm" onclick="clearFilter()">✕ All Time</button>
+  <span class="f-chip" id="fChip">🔍 Filtered</span>
+</div>
+
+<!-- ═══ PREVIOUS BALANCE ═══ -->
+<div class="prev-bal-panel fade-in">
+  <label>🏦 Opening / Previous Balance ৳:</label>
+  <input class="fi" type="number" id="prevBalInput" placeholder="0.00" style="max-width:200px;margin-bottom:0;" oninput="savePrevBal();render();">
+  <button class="btn btn-gr btn-sm" onclick="savePrevBal();render();toast('✓ Balance saved');">Save</button>
+  <span style="font-family:var(--mo);font-size:9px;color:var(--mu);">This is your carry-forward opening balance</span>
+</div>
+
+<!-- ═══ LARGE CARDS ═══ -->
+<section class="large-cards fade-in">
+  <div class="lcard" style="--lca:var(--bl)">
+    <span class="lc-icon">🛒</span><div class="lc-label">Total Sale</div>
+    <div class="lc-val" id="lc-sale">৳12,034</div><div class="lc-sub">All transactions</div>
+  </div>
+  <div class="lcard" style="--lca:var(--gr)">
+    <span class="lc-icon">💳</span><div class="lc-label">Total Cash In</div>
+    <div class="lc-val" id="lc-cash">৳12,162.29</div><div class="lc-sub" id="lc-cash-sub">Bank:৳11,042.29 | bKash:৳0 | Hand:৳1,120</div>
+  </div>
+  <div class="lcard" style="--lca:var(--or)">
+    <span class="lc-icon">📦</span><div class="lc-label">COGS</div>
+    <div class="lc-val" id="lc-cogs">৳8,320</div><div class="lc-sub">Paid for raw items</div>
+  </div>
+  <div class="lcard" style="--lca:var(--pu)">
+    <span class="lc-icon">💰</span><div class="lc-label">Net Profit</div>
+    <div class="lc-val" id="lc-profit" style="color: var(--pu);">৳2,675.06</div>
+    <div id="lc-margin" style="font-size:13px;font-weight:700;color:var(--lm);font-family:var(--mo);margin-top:4px;letter-spacing:-.3px;">+32.2% on COGS</div>
+    <div class="lc-sub" id="lc-margin-sub">After all deductions</div>
+  </div>
+  <div class="lcard" style="--lca:var(--rd)">
+    <span class="lc-icon">⚠️</span><div class="lc-label">Settlement Diff</div>
+    <div class="lc-val" id="lc-settle" style="color: var(--gr);">৳128.29</div><div class="lc-sub" id="lc-settle-sub">৳128.29 over-collected</div>
+  </div>
+</section>
+
+<!-- ═══ SMALL CARDS ═══ -->
+<section class="small-cards fade-in">
+  <div class="scard" style="--sca:var(--tl)"><div class="sc-label">Prev Balance</div><div class="sc-val" id="sc-prev">৳1,725</div></div>
+  <div class="scard" style="--sca:var(--rd)"><div class="sc-label">Total Expense</div><div class="sc-val" id="sc-exp">৳760</div></div>
+  <div class="scard" style="--sca:var(--yw)"><div class="sc-label">Employee Cost</div><div class="sc-val" id="sc-emp">৳110</div></div>
+  <div class="scard" style="--sca:var(--cy)"><div class="sc-label">Fund Reserved</div><div class="sc-val" id="sc-fund">৳297.23</div></div>
+  <div class="scard" style="--sca:var(--or)"><div class="sc-label">Withdrawn</div><div class="sc-val" id="sc-wd">৳0</div></div>
+  <div class="scard" style="--sca:var(--pk)"><div class="sc-label">Total Loan</div><div class="sc-val" id="sc-loan">৳0</div></div>
+  <div class="scard" style="--sca:var(--bl)"><div class="sc-label">Final Balance</div><div class="sc-val" id="sc-finbal" style="color: var(--bl);">৳4,400.06</div><div class="sc-sub">Without Fund</div></div>
+</section>
+
+<!-- ═══ GRAND TOTAL ═══ -->
+<div class="grand-card fade-in">
+  <div class="gc-left">
+    <div class="gc-label">Main Balance</div>
+    <div class="gc-title">🟢 Grand Total Balance (includes Remaining Fund)</div>
+    <div class="gc-val" id="gc-val" style="color: var(--gr);">৳4,697.29</div>
+    <div class="gc-sub">Final Balance + Remaining Fund</div>
+  </div>
+  <div class="gc-stats">
+    <div class="gc-stat"><div class="gc-stat-label">Final Balance</div><div class="gc-stat-val" id="gcs-finbal" style="color:var(--bl)">৳4,400.06</div></div>
+    <div class="gc-stat"><div class="gc-stat-label">Remaining Fund</div><div class="gc-stat-val" id="gcs-funbal" style="color:var(--cy)">৳297.23</div></div>
+    <div class="gc-stat"><div class="gc-stat-label">Total Withdrawn</div><div class="gc-stat-val" id="gcs-wd" style="color:var(--rd)">৳0</div></div>
+    <div class="gc-stat"><div class="gc-stat-label">Net Profit</div><div class="gc-stat-val" id="gcs-profit" style="color:var(--pu)">৳2,675.06</div></div>
+  </div>
+</div>
+
+<!-- ═══ TRANSACTION FORM ═══ -->
+<section class="panel fade-in">
+  <div class="panel-hdr">
+    <div class="panel-title">
+      ✚ New Transaction
+      <span class="ptag ptag-r">Sale + Cash required</span>
+      <span class="sub">/ Optional fields → 0</span>
+    </div>
+  </div>
+
+  <div class="edit-banner" id="editBannerTx">
+    <span>✏️ Editing transaction — make changes then click Update</span>
+    <button class="btn btn-ghost btn-sm" onclick="cancelEditTx()">✕ Cancel</button>
+  </div>
+  <div class="vbox" id="vboxTx"></div>
+
+  <!-- Date + Sale + COGS -->
+  <div class="g3">
+    <div class="fg"><label>📅 Date <span class="req">*</span></label><input class="fi" type="date" id="tf-date"></div>
+    <div class="fg">
+      <label>🛒 Total Sale ৳ <span class="req">*</span></label>
+      <input class="fi" type="number" id="tf-sale" placeholder="e.g. 15000" oninput="lp()">
+      <span class="ferr" id="err-sale">⚠ Required</span>
+    </div>
+    <div class="fg">
+      <label>📦 COGS / Raw Items ৳ <span class="opt">(optional)</span></label>
+      <input class="fi" type="number" id="tf-cogs" placeholder="0.00" oninput="lp()">
+    </div>
+  </div>
+
+  <!-- Cash + Employee -->
+  <div class="g2">
+    <div class="fg">
+      <label>💳 Cash Received <span class="req">*</span> <span class="opt">(Bank + bKash + Hand)</span></label>
+      <div class="subp">
+        <div class="subp-label">Breakdown</div>
+        <div class="sp3">
+          <div class="fg"><label>🏦 Bank ৳</label><input class="fi" type="number" id="tf-bank" placeholder="0.00" oninput="lp()"></div>
+          <div class="fg"><label>📱 bKash ৳</label><input class="fi" type="number" id="tf-bkash" placeholder="0.00" oninput="lp()"></div>
+          <div class="fg"><label>💵 Hand Cash ৳</label><input class="fi" type="number" id="tf-hand" placeholder="0.00" oninput="lp()"></div>
+        </div>
+      </div>
+      <span class="ferr" id="err-cash">⚠ At least one cash channel required</span>
+    </div>
+    <div class="fg">
+      <label>👷 Employee <span class="opt">(optional)</span></label>
+      <div class="subp">
+        <div class="subp-label">Breakdown</div>
+        <div class="sp2">
+          <div class="fg"><label>Name</label><input class="fi" type="text" id="tf-empname" placeholder="Employee name"></div>
+          <div class="fg"><label>Fixed ৳</label><input class="fi" type="number" id="tf-fixed" placeholder="0.00" oninput="lp()"></div>
+        </div>
+        <div style="margin-top:7px;">
+          <div class="fg"><label>Commission %</label><input class="fi" type="number" id="tf-comm" placeholder="0" min="0" max="100" step="0.1" oninput="lp()"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expense (per-transaction) + Loan + Fund + Note -->
+  <div class="g4">
+    <div class="fg">
+      <label>💸 Transaction Expense ৳ <span class="opt">(this entry only)</span></label>
+      <input class="fi" type="number" id="tf-txexp" placeholder="0.00" oninput="lp()">
+    </div>
+    <div class="fg">
+      <label>📋 Expense Category <span class="opt">(if expense entered)</span></label>
+      <select class="fi" id="tf-txexpcat" onchange="lp()">
+        <option value="">— Select —</option>
+        <option>Rent</option><option>Sponsorship</option><option>Transport</option>
+        <option>Salary Advance</option><option>Utility</option>
+        <option>Marketing</option><option>Maintenance</option><option>Other</option>
+      </select>
+      <span class="ferr" id="err-txexpcat">⚠ Category required when expense entered</span>
+    </div>
+    <div class="fg">
+      <label>🏦 Loan ৳ <span class="opt">(optional)</span></label>
+      <input class="fi" type="number" id="tf-loan" placeholder="0.00" oninput="lp()">
+    </div>
+    <div class="fg">
+      <label>🪙 Fund % <span class="opt">(0–100)</span></label>
+      <input class="fi" type="number" id="tf-fundpct" placeholder="0" min="0" max="100" step="1" oninput="syncSl();lp()">
+      <div class="sl-w">
+        <input type="range" id="tf-sl" min="0" max="100" step="1" value="0" oninput="syncFp();lp()">
+        <div class="sl-l"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="g2" style="margin-bottom:10px;">
+    <div class="fg">
+      <label>📝 Note <span class="opt">(optional)</span></label>
+      <input class="fi" type="text" id="tf-note" placeholder="e.g. Bulk order…">
+    </div>
+  </div>
+
+  <!-- LIVE PREVIEW -->
+  <div class="prev-bar">
+    <div class="pi"><div class="pi-l">Cash In</div><div class="pi-v c-bl" id="p-ci">৳0</div></div>
+    <div class="pi"><div class="pi-l">Settle</div><div class="pi-v " id="p-sd">৳0</div></div>
+    <div class="pi"><div class="pi-l">Gross Profit</div><div class="pi-v" id="p-gp">৳0</div></div>
+    <div class="pi"><div class="pi-l">Comm</div><div class="pi-v c-yw" id="p-com">৳0</div></div>
+    <div class="pi"><div class="pi-l">Emp Cost</div><div class="pi-v c-yw" id="p-ec">৳0</div></div>
+    <div class="pi"><div class="pi-l">Loan</div><div class="pi-v c-pk" id="p-ln">৳0</div></div>
+    <div class="pi"><div class="pi-l">Fund Amt</div><div class="pi-v c-cy" id="p-fa">৳0</div></div>
+    <div class="pi"><div class="pi-l">Net Profit</div><div class="pi-v c-gr" id="p-np">৳0</div></div>
+  </div>
+
+  <div class="fr">
+    <button class="btn btn-gr" id="txSubmitBtn" onclick="submitTx()">✚ Add Transaction</button>
+    <button class="btn btn-ghost" onclick="clearTxForm()">✕ Clear</button>
+  </div>
+</section>
+
+<!-- ═══ TRANSACTION TABLE ═══ -->
+<section class="panel fade-in">
+  <div class="panel-hdr">
+    <div class="panel-title">📋 Transactions <span class="sub" id="txCount">/ 3 records</span></div>
+  </div>
+  <div class="tw">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Date</th><th>Note</th><th>Employee</th>
+        <th>Sale ৳</th><th>Bank ৳</th><th>bKash ৳</th><th>Hand ৳</th><th>Cash In ৳</th>
+        <th>Settle</th><th>COGS ৳</th><th>Tx Exp ৳</th><th>Exp Cat</th><th>Fixed ৳</th><th>Comm%</th><th>Emp ৳</th>
+        <th>Loan ৳</th><th>Fund%</th><th>Fund ৳</th><th>Net Profit ৳</th>
+        <th>Actions</th>
+      </tr></thead>
+      <tbody id="txBody"><tr class="">
+      <td class="td-dim">1</td><td class="td-dim">2026-05-23</td>
+      <td><span style="color:var(--mu)">—</span></td>
+      <td>Asfi</td>
+      <td class="td-bl fw6">৳7,546</td>
+      <td class="td-gr">৳6,500</td><td class="td-gr">৳0</td>
+      <td class="td-tl">৳1,120</td><td class="td-gr fw6">৳7,620</td>
+      <td class="td-gr">▲৳74</td>
+      <td class="td-or">৳4,800</td>
+      <td class="td-rd">৳0</td>
+      <td style="font-size:9px;color:var(--rd)">—</td>
+      <td class="td-yw">৳110</td><td class="td-yw">0%</td>
+      <td class="td-yw fw6">৳110</td>
+      <td class="td-pk">৳0</td>
+      <td class="td-cy">10%</td><td class="td-cy">৳271</td>
+      <td class="fw6 pos">৳2,710<br><span style="font-size:10px;font-weight:700;color:var(--lm);">+56.5% on COGS</span></td>
+      <td><button class="ebt" onclick="startEditTx(1779536643241)">✏</button><button class="dbt" onclick="delTx(1779536643241)">✕</button></td>
+    </tr><tr class="">
+      <td class="td-dim">2</td><td class="td-dim">2026-05-23</td>
+      <td><span style="color:var(--mu)">—</span></td>
+      <td><span style="color:var(--mu)">—</span></td>
+      <td class="td-bl fw6">৳3,028</td>
+      <td class="td-gr">৳3,058.99</td><td class="td-gr">৳0</td>
+      <td class="td-tl">৳0</td><td class="td-gr fw6">৳3,058.99</td>
+      <td class="td-gr">▲৳30.99</td>
+      <td class="td-or">৳2,600</td>
+      <td class="td-rd">৳0</td>
+      <td style="font-size:9px;color:var(--rd)">—</td>
+      <td class="td-yw">৳0</td><td class="td-yw">0%</td>
+      <td class="td-yw fw6">৳0</td>
+      <td class="td-pk">৳0</td>
+      <td class="td-cy">10%</td><td class="td-cy">৳45.9</td>
+      <td class="fw6 pos">৳458.99<br><span style="font-size:10px;font-weight:700;color:var(--lm);">+17.7% on COGS</span></td>
+      <td><button class="ebt" onclick="startEditTx(1779562069596)">✏</button><button class="dbt" onclick="delTx(1779562069596)">✕</button></td>
+    </tr><tr class="">
+      <td class="td-dim">3</td><td class="td-dim">2026-05-24</td>
+      <td><span style="color:var(--mu)">—</span></td>
+      <td><span style="color:var(--mu)">—</span></td>
+      <td class="td-bl fw6">৳1,460</td>
+      <td class="td-gr">৳1,483.3</td><td class="td-gr">৳0</td>
+      <td class="td-tl">৳0</td><td class="td-gr fw6">৳1,483.3</td>
+      <td class="td-gr">▲৳23.3</td>
+      <td class="td-or">৳920</td>
+      <td class="td-rd">৳0</td>
+      <td style="font-size:9px;color:var(--rd)">—</td>
+      <td class="td-yw">৳0</td><td class="td-yw">0%</td>
+      <td class="td-yw fw6">৳0</td>
+      <td class="td-pk">৳0</td>
+      <td class="td-cy">10%</td><td class="td-cy">৳56.33</td>
+      <td class="fw6 pos">৳563.3<br><span style="font-size:10px;font-weight:700;color:var(--lm);">+61.2% on COGS</span></td>
+      <td><button class="ebt" onclick="startEditTx(1779604743102)">✏</button><button class="dbt" onclick="delTx(1779604743102)">✕</button></td>
+    </tr></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ═══ EXPENSE MODULE ═══ -->
+<section class="panel fade-in">
+  <div class="panel-hdr">
+    <div class="panel-title">💸 Category Expenses <span class="sub">/ Independent — not tied to transactions</span></div>
+  </div>
+
+  <div class="edit-banner" id="editBannerExp">
+    <span>✏️ Editing expense</span>
+    <button class="btn btn-ghost btn-sm" onclick="cancelEditExp()">✕ Cancel</button>
+  </div>
+
+  <div class="g4" style="margin-bottom:10px;">
+    <div class="fg">
+      <label>💵 Amount ৳ <span class="req">*</span></label>
+      <input class="fi" type="number" id="ef-amt" placeholder="0.00">
+    </div>
+    <div class="fg">
+      <label>📋 Category <span class="req">*</span></label>
+      <select class="fi" id="ef-cat">
+        <option value="">— Select —</option>
+        <option>Rent</option><option>Sponsorship</option><option>Transport</option>
+        <option>Salary Advance</option><option>Utility</option>
+        <option>Marketing</option><option>Maintenance</option><option>Other</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>📝 Purpose / Note <span class="req">*</span></label>
+      <input class="fi" type="text" id="ef-note" placeholder="e.g. Office rent…">
+    </div>
+    <div class="fg">
+      <label>📅 Date</label>
+      <input class="fi" type="date" id="ef-date">
+    </div>
+  </div>
+  <div class="fr" style="margin-bottom:14px;">
+    <button class="btn btn-rd" id="expSubmitBtn" onclick="submitExp()">✚ Add Expense</button>
+    <button class="btn btn-ghost" onclick="cancelEditExp()">✕ Clear</button>
+  </div>
+
+  <!-- Category breakdown -->
+  <div class="cat-grid" id="catGrid">
+    <div class="cat-c" style="--cc:#ff4040">
+      <div class="cat-n">Rent</div>
+      <div class="cat-v">৳410</div>
+    </div>
+    <div class="cat-c" style="--cc:#00b8d9">
+      <div class="cat-n">Utility</div>
+      <div class="cat-v">৳100</div>
+    </div>
+    <div class="cat-c" style="--cc:#1ac99a">
+      <div class="cat-n">Maintenance</div>
+      <div class="cat-v">৳250</div>
+    </div></div>
+
+  <div class="sdiv"><span>Expense History</span></div>
+  <div class="log-wrap"><div class="log-list" id="expList">
+    <div class="li">
+      <span class="li-cat" style="background:#ff404022;color:#ff4040">Rent</span>
+      <span class="li-name">Zatiq</span>
+      <span class="li-date">2026-05-23</span>
+      <span class="li-amt" style="color:var(--rd)">৳410</span>
+      <div class="li-acts">
+        <button class="ebt" onclick="startEditExp(1779536826914)">✏</button>
+        <button class="dbt" onclick="delExp(1779536826914)">✕</button>
+      </div>
+    </div>
+    <div class="li">
+      <span class="li-cat" style="background:#00b8d922;color:#00b8d9">Utility</span>
+      <span class="li-name">mobile, internet, etc.</span>
+      <span class="li-date">2026-05-23</span>
+      <span class="li-amt" style="color:var(--rd)">৳100</span>
+      <div class="li-acts">
+        <button class="ebt" onclick="startEditExp(1779562067399)">✏</button>
+        <button class="dbt" onclick="delExp(1779562067399)">✕</button>
+      </div>
+    </div>
+    <div class="li">
+      <span class="li-cat" style="background:#1ac99a22;color:#1ac99a">Maintenance</span>
+      <span class="li-name">Ai, Gemini, Nano-Banana (Hasib)</span>
+      <span class="li-date">2026-05-25</span>
+      <span class="li-amt" style="color:var(--rd)">৳250</span>
+      <div class="li-acts">
+        <button class="ebt" onclick="startEditExp(1779716169850)">✏</button>
+        <button class="dbt" onclick="delExp(1779716169850)">✕</button>
+      </div>
+    </div></div></div>
+</section>
+
+<!-- ═══ WITHDRAW + FUND ═══ -->
+<div class="g2">
+  <!-- WITHDRAW -->
+  <section class="panel fade-in">
+    <div class="panel-hdr"><div class="panel-title">💵 Withdrawals</div></div>
+    <div class="edit-banner" id="editBannerWd">
+      <span>✏️ Editing withdrawal</span>
+      <button class="btn btn-ghost btn-sm" onclick="cancelEditWd()">✕ Cancel</button>
+    </div>
+    <div class="g3" style="margin-bottom:9px;">
+      <div class="fg"><label>Amount ৳ <span class="req">*</span></label><input class="fi" type="number" id="wf-amt" placeholder="0.00"></div>
+      <div class="fg"><label>Purpose <span class="req">*</span></label><input class="fi" type="text" id="wf-reason" placeholder="e.g. Personal…"></div>
+      <div class="fg"><label>Date</label><input class="fi" type="date" id="wf-date"></div>
+    </div>
+    <div class="fr" style="margin-bottom:12px;">
+      <button class="btn btn-yw" id="wdSubmitBtn" onclick="submitWd()">− Withdraw</button>
+      <button class="btn btn-ghost" onclick="cancelEditWd()">✕ Clear</button>
+    </div>
+    <div class="sdiv"><span>History</span></div>
+    <div class="log-wrap"><div class="log-list" id="wdList"><div style="font-family:var(--mo);font-size:10px;color:var(--mu);">No withdrawals.</div></div></div>
+  </section>
+
+  <!-- FUND -->
+  <section class="panel fade-in">
+    <div class="panel-hdr"><div class="panel-title">🪙 Fund / Reserve Usage</div></div>
+    <div class="edit-banner" id="editBannerFu">
+      <span>✏️ Editing fund usage</span>
+      <button class="btn btn-ghost btn-sm" onclick="cancelEditFu()">✕ Cancel</button>
+    </div>
+    <div class="g3" style="margin-bottom:9px;">
+      <div class="fg"><label>Amount ৳ <span class="req">*</span></label><input class="fi" type="number" id="ff-amt" placeholder="0.00"></div>
+      <div class="fg"><label>Purpose <span class="req">*</span></label><input class="fi" type="text" id="ff-reason" placeholder="e.g. Equipment…"></div>
+      <div class="fg"><label>Date</label><input class="fi" type="date" id="ff-date"></div>
+    </div>
+    <div class="fr" style="margin-bottom:12px;">
+      <button class="btn btn-bl" id="fuSubmitBtn" onclick="submitFu()">− Use Fund</button>
+      <button class="btn btn-ghost" onclick="cancelEditFu()">✕ Clear</button>
+    </div>
+    <div class="sdiv"><span>Fund Usage History</span></div>
+    <div class="log-wrap"><div class="log-list" id="fuList"><div style="font-family:var(--mo);font-size:10px;color:var(--mu);">No fund usage.</div></div></div>
+  </section>
+</div>
+
+<!-- ═══ CHARTS ═══ -->
+<div class="panel-title" style="margin-bottom:12px;font-size:13px;font-weight:700;">📈 Analytics</div>
+<div class="charts-grid fade-in">
+  <div class="cc fw"><div class="cc-h"><div class="cc-t"><div class="cc-dot" style="--dc:var(--bl)"></div>Sales Over Time</div></div><div class="cw tall"><canvas id="ch-sales" width="1296" height="235" style="display: block; box-sizing: border-box; height: 235px; width: 1296px;"></canvas></div></div>
+  <div class="cc"><div class="cc-h"><div class="cc-t"><div class="cc-dot" style="--dc:var(--gr)"></div>Cash In: Bank / bKash / Hand Cash</div></div><div class="cw"><canvas id="ch-cash" width="624" height="175" style="display: block; box-sizing: border-box; height: 175px; width: 624px;"></canvas></div></div>
+  <div class="cc"><div class="cc-h"><div class="cc-t"><div class="cc-dot" style="--dc:var(--rd)"></div>Expenses (Category-wise)</div></div><div class="cw"><canvas id="ch-exp" width="624" height="175" style="display: block; box-sizing: border-box; height: 175px; width: 624px;"></canvas></div></div>
+  <div class="cc"><div class="cc-h"><div class="cc-t"><div class="cc-dot" style="--dc:var(--yw)"></div>Employee Cost: Fixed vs Commission</div></div><div class="cw"><canvas id="ch-emp" width="624" height="175" style="display: block; box-sizing: border-box; height: 175px; width: 624px;"></canvas></div></div>
+  <div class="cc"><div class="cc-h"><div class="cc-t"><div class="cc-dot" style="--dc:var(--cy)"></div>Fund Growth Over Time</div></div><div class="cw"><canvas id="ch-fund" width="624" height="175" style="display: block; box-sizing: border-box; height: 175px; width: 624px;"></canvas></div></div>
+  <div class="cc"><div class="cc-h"><div class="cc-t"><div class="cc-dot" style="--dc:var(--pu)"></div>Net Profit Over Time</div></div><div class="cw"><canvas id="ch-profit" width="624" height="175" style="display: block; box-sizing: border-box; height: 175px; width: 624px;"></canvas></div></div>
+  <div class="cc"><div class="cc-h"><div class="cc-t"><div class="cc-dot" style="--dc:var(--or)"></div>Final Balance Over Time</div></div><div class="cw"><canvas id="ch-balance" width="624" height="175" style="display: block; box-sizing: border-box; height: 175px; width: 624px;"></canvas></div></div>
+  <div class="cc"><div class="cc-h"><div class="cc-t"><div class="cc-dot" style="--dc:var(--rd)"></div>Settlement Difference Trend</div></div><div class="cw"><canvas id="ch-settle" width="624" height="175" style="display: block; box-sizing: border-box; height: 175px; width: 624px;"></canvas></div></div>
+</div>
+
+</main>
+<footer><div class="wrap">
+  BizTrack Ultimate ERP &nbsp;·&nbsp; localStorage · Chart.js · jsPDF · SheetJS · Fully Offline
+  &nbsp;·&nbsp;
+  <a href="https://shoyabsadik.github.io/" target="_blank" style="color:var(--gr);text-decoration:none;font-family:var(--mo);font-size:9px;">
+    Designed by M. Shoyab Sadik ↗
+  </a>
+</div></footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DATA ISOLATION — unique key per file instance
+═══════════════════════════════════════════════════════════ */
+/* ── DATA ISOLATION ──
+   INST is a unique ID burned into this specific file at generation time.
+   - Move / Cut / Paste / Rename the file → data stays (ID never changes)
+   - Copy the file → SAME data (same ID). To get separate data, use
+     the "New Instance" button which duplicates the file with a new ID.
+   - Different browser or profile → always separate (different localStorage) */
+const INST = 'btu_g16o9zs6gwuqrmdh76v3';
+
+const K = {
+  tx:  INST + '_tx',
+  exp: INST + '_exp',
+  wd:  INST + '_wd',
+  fu:  INST + '_fu',
+  pb:  INST + '_pb',
+};
+
+const ld  = k => { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } };
+const sv  = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+const ldN = k => { try { return parseFloat(localStorage.getItem(k)) || 0; } catch { return 0; } };
+
+let TX  = ld(K.tx);
+let EX  = ld(K.exp);
+let WD  = ld(K.wd);
+let FU  = ld(K.fu);
+let prevBal = ldN(K.pb);
+
+let fFrom = null, fTo = null;
+let editTxId = null, editExpId = null, editWdId = null, editFuId = null;
+
+const today = () => new Date().toISOString().split('T')[0];
+const fmt   = n => '৳' + (+n||0).toLocaleString('en-BD',{minimumFractionDigits:0,maximumFractionDigits:2});
+const fmtN  = n => (+n||0).toLocaleString('en-BD',{minimumFractionDigits:0,maximumFractionDigits:2});
+
+const EXP_CATS = ['Rent','Sponsorship','Transport','Salary Advance','Utility','Marketing','Maintenance','Other'];
+const CAT_CLR = {
+  'Rent':'#ff4040','Sponsorship':'#ff6ba8','Transport':'#ff7020',
+  'Salary Advance':'#f5a200','Utility':'#00b8d9','Marketing':'#9d5fff',
+  'Maintenance':'#1ac99a','Other':'#3d8bff'
+};
+
+/* ═══════════════════════════════════════════════════════════
+   PREVIOUS BALANCE
+═══════════════════════════════════════════════════════════ */
+function savePrevBal() {
+  prevBal = parseFloat(document.getElementById('prevBalInput').value) || 0;
+  localStorage.setItem(K.pb, prevBal);
+}
+function loadPrevBalInput() {
+  document.getElementById('prevBalInput').value = prevBal || '';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CALC ENGINE
+═══════════════════════════════════════════════════════════ */
+function calcTx(t) {
+  const sale    = +t.sale    || 0;
+  const bank    = +t.bank    || 0;
+  const bkash   = +t.bkash   || 0;
+  const hand    = +t.hand    || 0;
+  const cogs    = +t.cogs    || 0;
+  const txExp   = +t.txExp   || 0;  // per-transaction expense
+  const fixed   = +t.fixed   || 0;
+  const commPct = +t.comm    || 0;
+  const loan    = +t.loan    || 0;
+  const fundPct = +t.fundPct || 0;
+
+  const cashIn      = bank + bkash + hand;
+  const settleDiff  = sale - cashIn;
+  const commission  = (sale * commPct) / 100;
+  const empCost     = fixed + commission;
+  // Order: CashIn - COGS - TxExp - EmpCost - Loan = beforeFundPerTx
+  // Global Category Expenses will be deducted in aggTx before Fund calculation
+  const grossProfit   = cashIn - cogs - txExp;
+  const beforeEmpLoan = grossProfit - empCost - loan;
+  // Fund is NOT calculated here per-tx anymore.
+  // Fund will be calculated in aggTx after globalExp is deducted.
+  // We return beforeEmpLoan so aggTx can deduct globalExp then apply fund.
+  return { cashIn, settleDiff, commission, empCost, txExp, grossProfit, beforeEmpLoan };
+}
+
+// For preview (uses current expense total)
+function calcPreview(t) { return calcTx(t); }
+
+function aggTx(txList) {
+  let sale=0,cash=0,bank=0,bkash=0,hand=0,cogs=0,txExpTotal=0,empCost=0,loan=0,settle=0,sumBeforeFund=0;
+  // Collect each tx's fund% to compute weighted fund
+  const txFundPcts = [];
+  txList.forEach(t => {
+    const r = calcTx(t);
+    sale          += +t.sale  || 0;
+    cash          += r.cashIn;
+    bank          += +t.bank  || 0;
+    bkash         += +t.bkash || 0;
+    hand          += +t.hand  || 0;
+    cogs          += +t.cogs  || 0;
+    txExpTotal    += +t.txExp || 0;
+    empCost       += r.empCost;
+    loan          += +t.loan  || 0;
+    sumBeforeFund += r.beforeEmpLoan; // sum of (CashIn-COGS-TxExp-Emp-Loan) per tx
+    settle        += r.settleDiff;
+    txFundPcts.push(+t.fundPct || 0);
+  });
+
+  // Step 1: deduct global category expenses BEFORE fund
+  const globalExp      = EX.reduce((s,e) => s + (+e.amount||0), 0);
+  const profitBeforeFund = sumBeforeFund - globalExp;
+
+  // Step 2: apply fund% to profit-before-fund
+  // Use weighted average fund% across transactions
+  const avgFundPct = txFundPcts.length > 0
+    ? txFundPcts.reduce((a,b)=>a+b,0) / txFundPcts.length
+    : 0;
+  const fund = Math.max(0, (profitBeforeFund * avgFundPct) / 100);
+
+  // Step 3: net profit = profit before fund - fund
+  const profit = profitBeforeFund - fund;
+
+  return { sale, cash, bank, bkash, hand, cogs, txExpTotal, empCost, loan,
+           fund, profitBeforeFund, profit, settle, globalExp, avgFundPct };
+}
+
+function aggExp(expList) {
+  const total = expList.reduce((s,e)=>s+(+e.amount||0),0);
+  const byCat = {};
+  expList.forEach(e => { if(e.cat) byCat[e.cat] = (byCat[e.cat]||0) + (+e.amount||0); });
+  return { total, byCat };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FILTER
+═══════════════════════════════════════════════════════════ */
+function applyFilter() {
+  fFrom = document.getElementById('fFrom').value || null;
+  fTo   = document.getElementById('fTo').value   || null;
+  const c = document.getElementById('fChip');
+  (fFrom||fTo) ? c.classList.add('on') : c.classList.remove('on');
+  render();
+}
+function clearFilter() {
+  fFrom=fTo=null;
+  document.getElementById('fFrom').value='';
+  document.getElementById('fTo').value='';
+  document.getElementById('fChip').classList.remove('on');
+  render();
+}
+const filteredTx = () => TX.filter(t => !(fFrom&&t.date<fFrom) && !(fTo&&t.date>fTo));
+
+/* ═══════════════════════════════════════════════════════════
+   SLIDER
+═══════════════════════════════════════════════════════════ */
+function syncSl() {
+  const v = Math.min(100,Math.max(0,+document.getElementById('tf-fundpct').value||0));
+  const sl = document.getElementById('tf-sl');
+  sl.value=v; sl.style.setProperty('--pct',v+'%');
+}
+function syncFp() {
+  const v = document.getElementById('tf-sl').value;
+  document.getElementById('tf-fundpct').value=v;
+  document.getElementById('tf-sl').style.setProperty('--pct',v+'%');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIVE PREVIEW
+═══════════════════════════════════════════════════════════ */
+function lp() {
+  const t = {
+    sale:    document.getElementById('tf-sale').value,
+    bank:    document.getElementById('tf-bank').value,
+    bkash:   document.getElementById('tf-bkash').value,
+    hand:    document.getElementById('tf-hand').value,
+    cogs:    document.getElementById('tf-cogs').value,
+    txExp:   document.getElementById('tf-txexp').value,
+    fixed:   document.getElementById('tf-fixed').value,
+    comm:    document.getElementById('tf-comm').value,
+    loan:    document.getElementById('tf-loan').value,
+    fundPct: document.getElementById('tf-fundpct').value,
+  };
+  const r = calcPreview(t);
+  document.getElementById('p-ci').textContent  = fmt(r.cashIn);
+  const psd = document.getElementById('p-sd');
+  psd.textContent = fmt(r.settleDiff);
+  psd.className = 'pi-v '+(r.settleDiff>0?'c-rd':r.settleDiff<0?'c-gr':'');
+  document.getElementById('p-gp').textContent = fmt(r.grossProfit);
+  document.getElementById('p-com').textContent = fmt(r.commission);
+  document.getElementById('p-ec').textContent  = fmt(r.empCost);
+  document.getElementById('p-ln').textContent  = fmt(+t.loan||0);
+  // Preview: deduct current globalExp then apply fund%
+  // Preview = this transaction only, no global expense
+  const previewFundPct   = Math.min(100, Math.max(0, +t.fundPct||0));
+  const previewFund      = Math.max(0, (r.beforeEmpLoan * previewFundPct) / 100);
+  const previewNetProfit = r.beforeEmpLoan - previewFund;
+  document.getElementById('p-fa').textContent  = fmt(previewFund);
+  const pnp = document.getElementById('p-np');
+  const previewCogs = +t.cogs || 0;
+  const marginPct   = previewCogs > 0 ? (previewNetProfit / previewCogs) * 100 : 0;
+  const marginStr   = previewCogs > 0
+    ? '  (' + (marginPct>=0?'+':'') + marginPct.toFixed(1) + '%)'
+    : '';
+  pnp.textContent = fmt(previewNetProfit) + marginStr;
+  pnp.className = 'pi-v '+(previewNetProfit>=0?'c-gr':'c-rd');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VALIDATE TRANSACTION
+═══════════════════════════════════════════════════════════ */
+function validateTx() {
+  const sale = document.getElementById('tf-sale').value;
+  const bank = document.getElementById('tf-bank').value;
+  const bkash = document.getElementById('tf-bkash').value;
+  const hand = document.getElementById('tf-hand').value;
+  ['tf-sale','tf-bank','tf-bkash','tf-hand'].forEach(id=>document.getElementById(id).classList.remove('err'));
+  ['err-sale','err-cash'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  document.getElementById('vboxTx').classList.remove('on');
+  let msgs=[], fail=false;
+  if (!sale||isNaN(parseFloat(sale))) {
+    document.getElementById('tf-sale').classList.add('err');
+    document.getElementById('err-sale').classList.add('on');
+    msgs.push('• Total Sale Amount'); fail=true;
+  }
+  if (![(bank),(bkash),(hand)].some(v=>parseFloat(v)>0)) {
+    ['tf-bank','tf-bkash','tf-hand'].forEach(id=>document.getElementById(id).classList.add('err'));
+    document.getElementById('err-cash').classList.add('on');
+    msgs.push('• At least one cash channel (Bank / bKash / Hand)'); fail=true;
+  }
+  if (fail) {
+    const vb=document.getElementById('vboxTx');
+    vb.innerHTML='⚠ Required fields missing:<br>'+msgs.join('<br>');
+    vb.classList.add('on'); vb.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
+  return !fail;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SUBMIT TRANSACTION
+═══════════════════════════════════════════════════════════ */
+function submitTx() {
+  if (!validateTx()) return;
+  const fp = Math.min(100,Math.max(0,parseFloat(document.getElementById('tf-fundpct').value)||0));
+  // validate per-tx expense category
+  const txExpVal = parseFloat(document.getElementById('tf-txexp').value) || 0;
+  const txExpCat = document.getElementById('tf-txexpcat').value;
+  if (txExpVal > 0 && !txExpCat) {
+    document.getElementById('tf-txexpcat').classList.add('err');
+    document.getElementById('err-txexpcat').classList.add('on');
+    const vb = document.getElementById('vboxTx');
+    vb.innerHTML = '⚠ Expense Category is required when expense amount is entered.';
+    vb.classList.add('on');
+    return;
+  }
+  document.getElementById('tf-txexpcat').classList.remove('err');
+  document.getElementById('err-txexpcat').classList.remove('on');
+
+  const entry = {
+    id:       editTxId || Date.now(),
+    date:     document.getElementById('tf-date').value || today(),
+    note:     document.getElementById('tf-note').value.trim(),
+    empName:  document.getElementById('tf-empname').value.trim(),
+    sale:     parseFloat(document.getElementById('tf-sale').value)  || 0,
+    bank:     parseFloat(document.getElementById('tf-bank').value)  || 0,
+    bkash:    parseFloat(document.getElementById('tf-bkash').value) || 0,
+    hand:     parseFloat(document.getElementById('tf-hand').value)  || 0,
+    cogs:     parseFloat(document.getElementById('tf-cogs').value)  || 0,
+    txExp:    txExpVal,
+    txExpCat: txExpCat,
+    fixed:    parseFloat(document.getElementById('tf-fixed').value) || 0,
+    comm:     parseFloat(document.getElementById('tf-comm').value)  || 0,
+    loan:     parseFloat(document.getElementById('tf-loan').value)  || 0,
+    fundPct:  fp,
+  };
+  if (editTxId) {
+    const idx = TX.findIndex(t=>t.id===editTxId);
+    if (idx>-1) TX[idx]=entry;
+    cancelEditTx(); toast('✓ Transaction updated');
+  } else {
+    TX.push(entry); toast('✓ Transaction added');
+  }
+  sv(K.tx,TX); render(); clearTxForm();
+}
+
+function startEditTx(id) {
+  const t = TX.find(t=>t.id===id); if(!t) return;
+  editTxId=id;
+  document.getElementById('tf-date').value       = t.date;
+  document.getElementById('tf-note').value       = t.note||'';
+  document.getElementById('tf-empname').value    = t.empName||'';
+  document.getElementById('tf-sale').value       = t.sale;
+  document.getElementById('tf-bank').value       = t.bank;
+  document.getElementById('tf-bkash').value      = t.bkash;
+  document.getElementById('tf-hand').value       = t.hand||0;
+  document.getElementById('tf-cogs').value       = t.cogs||0;
+  document.getElementById('tf-txexp').value      = t.txExp||0;
+  document.getElementById('tf-txexpcat').value   = t.txExpCat||'';
+  document.getElementById('tf-fixed').value      = t.fixed;
+  document.getElementById('tf-comm').value       = t.comm;
+  document.getElementById('tf-loan').value       = t.loan;
+  document.getElementById('tf-fundpct').value    = t.fundPct;
+  syncSl(); lp();
+  document.getElementById('editBannerTx').classList.add('on');
+  document.getElementById('txSubmitBtn').textContent='✔ Update Transaction';
+  document.getElementById('tf-sale').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function cancelEditTx() {
+  editTxId=null;
+  document.getElementById('editBannerTx').classList.remove('on');
+  document.getElementById('txSubmitBtn').textContent='✚ Add Transaction';
+  clearTxForm();
+}
+
+function clearTxForm() {
+  ['tf-sale','tf-bank','tf-bkash','tf-hand','tf-cogs','tf-txexp','tf-fixed','tf-comm','tf-loan','tf-fundpct','tf-note','tf-empname'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('tf-txexpcat').value='';
+  document.getElementById('tf-txexpcat').classList.remove('err');
+  document.getElementById('err-txexpcat').classList.remove('on');
+  document.getElementById('tf-sl').value=0;
+  document.getElementById('tf-sl').style.setProperty('--pct','0%');
+  document.getElementById('vboxTx').classList.remove('on');
+  ['tf-sale','tf-bank','tf-bkash','tf-hand'].forEach(id=>document.getElementById(id).classList.remove('err','edit-hi'));
+  ['err-sale','err-cash'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  lp();
+}
+
+function delTx(id) { TX=TX.filter(t=>t.id!==id); sv(K.tx,TX); render(); toast('⊗ Deleted','te'); }
+function deleteLast() {
+  if (!TX.length) { toast('No entries','tw'); return; }
+  if (!confirm('Delete last transaction?')) return;
+  TX.pop(); sv(K.tx,TX); render(); toast('⊗ Last deleted','te');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXPENSE MODULE
+═══════════════════════════════════════════════════════════ */
+function submitExp() {
+  const amt  = parseFloat(document.getElementById('ef-amt').value);
+  const cat  = document.getElementById('ef-cat').value;
+  const note = document.getElementById('ef-note').value.trim();
+  const date = document.getElementById('ef-date').value || today();
+  if (!amt||amt<=0) { toast('⚠ Valid amount required','tw'); return; }
+  if (!cat)         { toast('⚠ Category required','tw'); return; }
+  if (!note)        { toast('⚠ Purpose/note required','tw'); return; }
+  const entry = { id: editExpId||Date.now(), amount:amt, cat, note, date };
+  if (editExpId) {
+    const idx=EX.findIndex(e=>e.id===editExpId); if(idx>-1) EX[idx]=entry;
+    cancelEditExp(); toast('✓ Expense updated');
+  } else {
+    EX.push(entry); toast('✓ Expense added');
+  }
+  sv(K.exp,EX); render(); renderExpList(); clearExpForm();
+}
+function startEditExp(id) {
+  const e=EX.find(e=>e.id===id); if(!e) return;
+  editExpId=id;
+  document.getElementById('ef-amt').value  = e.amount;
+  document.getElementById('ef-cat').value  = e.cat;
+  document.getElementById('ef-note').value = e.note;
+  document.getElementById('ef-date').value = e.date;
+  document.getElementById('editBannerExp').classList.add('on');
+  document.getElementById('expSubmitBtn').textContent='✔ Update Expense';
+}
+function cancelEditExp() {
+  editExpId=null;
+  document.getElementById('editBannerExp').classList.remove('on');
+  document.getElementById('expSubmitBtn').textContent='✚ Add Expense';
+  clearExpForm();
+}
+function clearExpForm() {
+  ['ef-amt','ef-note','ef-date'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ef-cat').value='';
+}
+function delExp(id) { EX=EX.filter(e=>e.id!==id); sv(K.exp,EX); render(); renderExpList(); toast('⊗ Deleted','te'); }
+
+function renderExpList() {
+  const el = document.getElementById('expList');
+  if (!EX.length) { el.innerHTML='<div style="font-family:var(--mo);font-size:10px;color:var(--mu);">No expenses yet.</div>'; return; }
+  el.innerHTML = EX.map(e=>`
+    <div class="li">
+      <span class="li-cat" style="background:${CAT_CLR[e.cat]||'#3d8bff'}22;color:${CAT_CLR[e.cat]||'#3d8bff'}">${e.cat}</span>
+      <span class="li-name">${e.note}</span>
+      <span class="li-date">${e.date}</span>
+      <span class="li-amt" style="color:var(--rd)">${fmt(e.amount)}</span>
+      <div class="li-acts">
+        <button class="ebt" onclick="startEditExp(${e.id})">✏</button>
+        <button class="dbt" onclick="delExp(${e.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function getCombinedCatTotals() {
+  // Merge global EX categories + per-transaction expense categories
+  const byCat = {};
+  EX.forEach(e => { if(e.cat) byCat[e.cat] = (byCat[e.cat]||0) + (+e.amount||0); });
+  filteredTx().forEach(t => {
+    if (t.txExp > 0 && t.txExpCat) {
+      byCat[t.txExpCat] = (byCat[t.txExpCat]||0) + (+t.txExp||0);
+    }
+  });
+  return byCat;
+}
+
+function renderCatCards(byCat) {
+  const el = document.getElementById('catGrid');
+  const entries = Object.entries(byCat).filter(([,v])=>v>0);
+  if (!entries.length) { el.innerHTML=''; return; }
+  el.innerHTML = entries.map(([cat,amt])=>`
+    <div class="cat-c" style="--cc:${CAT_CLR[cat]||'#3d8bff'}">
+      <div class="cat-n">${cat}</div>
+      <div class="cat-v">${fmt(amt)}</div>
+    </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WITHDRAW MODULE
+═══════════════════════════════════════════════════════════ */
+function submitWd() {
+  const amt    = parseFloat(document.getElementById('wf-amt').value);
+  const reason = document.getElementById('wf-reason').value.trim();
+  const date   = document.getElementById('wf-date').value || today();
+  if (!amt||amt<=0) { toast('⚠ Valid amount required','tw'); return; }
+  if (!reason)      { toast('⚠ Purpose required','tw'); return; }
+  const entry = { id:editWdId||Date.now(), amount:amt, reason, date };
+  if (editWdId) {
+    const idx=WD.findIndex(w=>w.id===editWdId); if(idx>-1) WD[idx]=entry;
+    cancelEditWd(); toast('✓ Updated');
+  } else {
+    WD.push(entry); toast('✓ Withdrawal recorded');
+  }
+  sv(K.wd,WD); render(); renderWdList(); clearWdForm();
+}
+function startEditWd(id) {
+  const w=WD.find(w=>w.id===id); if(!w) return;
+  editWdId=id;
+  document.getElementById('wf-amt').value    = w.amount;
+  document.getElementById('wf-reason').value = w.reason;
+  document.getElementById('wf-date').value   = w.date;
+  document.getElementById('editBannerWd').classList.add('on');
+  document.getElementById('wdSubmitBtn').textContent='✔ Update';
+}
+function cancelEditWd() {
+  editWdId=null; document.getElementById('editBannerWd').classList.remove('on');
+  document.getElementById('wdSubmitBtn').textContent='− Withdraw'; clearWdForm();
+}
+function clearWdForm() {
+  ['wf-amt','wf-reason','wf-date'].forEach(id=>document.getElementById(id).value='');
+}
+function delWd(id) { WD=WD.filter(w=>w.id!==id); sv(K.wd,WD); render(); renderWdList(); toast('⊗ Deleted','te'); }
+
+function renderWdList() {
+  const el=document.getElementById('wdList');
+  if (!WD.length) { el.innerHTML='<div style="font-family:var(--mo);font-size:10px;color:var(--mu);">No withdrawals.</div>'; return; }
+  el.innerHTML=WD.map(w=>`
+    <div class="li">
+      <span class="li-name">${w.reason}</span>
+      <span class="li-date">${w.date}</span>
+      <span class="li-amt c-rd">−${fmt(w.amount)}</span>
+      <div class="li-acts">
+        <button class="ebt" onclick="startEditWd(${w.id})">✏</button>
+        <button class="dbt" onclick="delWd(${w.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FUND USAGE MODULE
+═══════════════════════════════════════════════════════════ */
+function submitFu() {
+  const amt    = parseFloat(document.getElementById('ff-amt').value);
+  const reason = document.getElementById('ff-reason').value.trim();
+  const date   = document.getElementById('ff-date').value || today();
+  if (!amt||amt<=0) { toast('⚠ Valid amount required','tw'); return; }
+  if (!reason)      { toast('⚠ Purpose required','tw'); return; }
+  const a       = aggTx(filteredTx());
+  const totalFu = FU.filter(f=>f.id!==editFuId).reduce((s,f)=>s+(+f.amount||0),0);
+  if (amt > a.fund-totalFu) { toast(`⚠ Exceeds fund balance (${fmt(a.fund-totalFu)})`,'tw'); return; }
+  const entry = { id:editFuId||Date.now(), amount:amt, reason, date };
+  if (editFuId) {
+    const idx=FU.findIndex(f=>f.id===editFuId); if(idx>-1) FU[idx]=entry;
+    cancelEditFu(); toast('✓ Updated');
+  } else {
+    FU.push(entry); toast('✓ Fund usage recorded');
+  }
+  sv(K.fu,FU); render(); renderFuList(); clearFuForm();
+}
+function startEditFu(id) {
+  const f=FU.find(f=>f.id===id); if(!f) return;
+  editFuId=id;
+  document.getElementById('ff-amt').value    = f.amount;
+  document.getElementById('ff-reason').value = f.reason;
+  document.getElementById('ff-date').value   = f.date;
+  document.getElementById('editBannerFu').classList.add('on');
+  document.getElementById('fuSubmitBtn').textContent='✔ Update';
+}
+function cancelEditFu() {
+  editFuId=null; document.getElementById('editBannerFu').classList.remove('on');
+  document.getElementById('fuSubmitBtn').textContent='− Use Fund'; clearFuForm();
+}
+function clearFuForm() {
+  ['ff-amt','ff-reason','ff-date'].forEach(id=>document.getElementById(id).value='');
+}
+function delFu(id) { FU=FU.filter(f=>f.id!==id); sv(K.fu,FU); render(); renderFuList(); toast('⊗ Deleted','te'); }
+
+function renderFuList() {
+  const el=document.getElementById('fuList');
+  if (!FU.length) { el.innerHTML='<div style="font-family:var(--mo);font-size:10px;color:var(--mu);">No fund usage.</div>'; return; }
+  el.innerHTML=FU.map(f=>`
+    <div class="li">
+      <span class="li-name">${f.reason}</span>
+      <span class="li-date">${f.date}</span>
+      <span class="li-amt c-cy">−${fmt(f.amount)}</span>
+      <div class="li-acts">
+        <button class="ebt" onclick="startEditFu(${f.id})">✏</button>
+        <button class="dbt" onclick="delFu(${f.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════════════════ */
+function confirmReset() {
+  if (!TX.length&&!EX.length&&!WD.length&&!FU.length) { toast('Nothing to reset','tw'); return; }
+  if (!confirm('Reset ALL data in this ERP instance? Cannot be undone.')) return;
+  TX=[]; EX=[]; WD=[]; FU=[];
+  sv(K.tx,TX); sv(K.exp,EX); sv(K.wd,WD); sv(K.fu,FU);
+  render(); renderExpList(); renderWdList(); renderFuList();
+  toast('⊗ All data cleared','te');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER CARDS
+═══════════════════════════════════════════════════════════ */
+function renderCards() {
+  const tx     = filteredTx();
+  const a      = aggTx(tx);
+  const expA   = aggExp(EX);
+  const totalWD= WD.reduce((s,w)=>s+(+w.amount||0),0);
+  const totalFU= FU.reduce((s,f)=>s+(+f.amount||0),0);
+  const fundBal= Math.max(0, a.fund-totalFU);
+  // Global category expenses deducted once from balance — same logic as withdrawals
+  // profit already has globalExp deducted inside aggTx
+  const finBal = prevBal + a.profit - totalWD;
+  const grandTotal = finBal + fundBal;
+
+  // Large cards
+  document.getElementById('lc-sale').textContent   = fmt(a.sale);
+  document.getElementById('lc-cash').textContent   = fmt(a.cash);
+  document.getElementById('lc-cash-sub').textContent = `Bank:${fmt(a.bank)} | bKash:${fmt(a.bkash)} | Hand:${fmt(a.hand)}`;
+  document.getElementById('lc-cogs').textContent   = fmt(a.cogs);
+  // Total expense = per-transaction expenses + global expense entries
+  const totalAllExp = a.txExpTotal + expA.total; // display: all expenses combined
+
+  const lcp = document.getElementById('lc-profit');
+  lcp.textContent = fmt(a.profit);
+  lcp.style.color = a.profit>=0?'var(--pu)':'var(--rd)';
+
+  // Overall Profit Margin %
+  // Margin % inside profit card
+  const overallMargin = a.cogs > 0 ? (a.profit / a.cogs) * 100 : 0;
+  const lm = document.getElementById('lc-margin');
+  if (lm) {
+    lm.textContent = a.cogs > 0
+      ? (overallMargin>=0?'+':'')+overallMargin.toFixed(1)+'% on COGS'
+      : '—';
+    lm.style.color = overallMargin >= 0 ? 'var(--lm)' : 'var(--rd)';
+  }
+
+  const lcs = document.getElementById('lc-settle');
+  lcs.textContent = fmt(Math.abs(a.settle));
+  lcs.style.color = a.settle>0?'var(--rd)':a.settle<0?'var(--gr)':'var(--mu)';
+  document.getElementById('lc-settle-sub').textContent = a.settle>0?`${fmt(a.settle)} uncollected`:a.settle<0?`${fmt(Math.abs(a.settle))} over-collected`:'Fully settled';
+
+  // Small cards
+  document.getElementById('sc-prev').textContent  = fmt(prevBal);
+  document.getElementById('sc-exp').textContent   = fmt(totalAllExp);
+  document.getElementById('sc-emp').textContent   = fmt(a.empCost);
+  document.getElementById('sc-fund').textContent  = fmt(a.fund);
+  document.getElementById('sc-wd').textContent    = fmt(totalWD);
+  document.getElementById('sc-loan').textContent  = fmt(a.loan);
+  const scfb = document.getElementById('sc-finbal');
+  scfb.textContent = fmt(finBal);
+  scfb.style.color = finBal>=0?'var(--bl)':'var(--rd)';
+
+  // Grand total
+  const gcv = document.getElementById('gc-val');
+  gcv.textContent = fmt(grandTotal);
+  gcv.style.color = grandTotal>=0?'var(--gr)':'var(--rd)';
+  document.getElementById('gcs-finbal').textContent = fmt(finBal);
+  document.getElementById('gcs-funbal').textContent = fmt(fundBal);
+  document.getElementById('gcs-wd').textContent     = fmt(totalWD);
+  document.getElementById('gcs-profit').textContent = fmt(a.profit);
+
+  document.getElementById('entryCount').textContent = TX.length;
+  renderCatCards(getCombinedCatTotals());
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER TABLE
+═══════════════════════════════════════════════════════════ */
+function renderTable() {
+  const tx = filteredTx();
+  const b  = document.getElementById('txBody');
+  document.getElementById('txCount').textContent = `/ ${tx.length} record${tx.length!==1?'s':''}${(fFrom||fTo)?' (filtered)':''}`;
+
+  if (!tx.length) {
+    b.innerHTML=`<tr><td colspan="19"><div class="empty-r"><span class="ei">📭</span>${TX.length?'No entries in range.':'No transactions yet.'}</div></td></tr>`;
+    return;
+  }
+  b.innerHTML = tx.map((t,i) => {
+    const r  = calcTx(t);
+    const dc = r.settleDiff>0?'td-rd':r.settleDiff<0?'td-gr':'td-dim';
+    const dl = r.settleDiff>0?`▼${fmt(r.settleDiff)}`:r.settleDiff<0?`▲${fmt(Math.abs(r.settleDiff))}`:'✓';
+    return `<tr class="${t.id===editTxId?'ed-row':''}">
+      <td class="td-dim">${i+1}</td><td class="td-dim">${t.date}</td>
+      <td>${t.note||'<span style="color:var(--mu)">—</span>'}</td>
+      <td>${t.empName||'<span style="color:var(--mu)">—</span>'}</td>
+      <td class="td-bl fw6">${fmt(t.sale)}</td>
+      <td class="td-gr">${fmt(t.bank)}</td><td class="td-gr">${fmt(t.bkash)}</td>
+      <td class="td-tl">${fmt(t.hand||0)}</td><td class="td-gr fw6">${fmt(r.cashIn)}</td>
+      <td class="${dc}">${dl}</td>
+      <td class="td-or">${fmt(t.cogs||0)}</td>
+      <td class="td-rd">${fmt(t.txExp||0)}</td>
+      <td style="font-size:9px;color:var(--rd)">${t.txExpCat||'—'}</td>
+      <td class="td-yw">${fmt(t.fixed)}</td><td class="td-yw">${t.comm}%</td>
+      <td class="td-yw fw6">${fmt(r.empCost)}</td>
+      <td class="td-pk">${fmt(t.loan)}</td>
+      <td class="td-cy">${t.fundPct}%</td><td class="td-cy">${fmt(Math.max(0,(r.beforeEmpLoan*(+t.fundPct||0))/100))}</td>
+      <td class="fw6 ${r.beforeEmpLoan>=0?'pos':'neg'}">${fmt(r.beforeEmpLoan)}<br><span style="font-size:10px;font-weight:700;color:${+t.cogs>0?(r.beforeEmpLoan/+t.cogs>=0?'var(--lm)':'var(--rd)'):'var(--mu)'};">${(()=>{if(+t.cogs<=0)return '';const m=(r.beforeEmpLoan/+t.cogs)*100;return (m>=0?'+':'')+m.toFixed(1)+'% on COGS';})()}</span></td>
+      <td><button class="ebt" onclick="startEditTx(${t.id})">✏</button><button class="dbt" onclick="delTx(${t.id})">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHARTS
+═══════════════════════════════════════════════════════════ */
+const CD = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{
+    legend:{display:false},
+    tooltip:{
+      backgroundColor:'#101828',borderColor:'#182040',borderWidth:1,
+      titleColor:'#cdd8f0',bodyColor:'#3d4f72',
+      titleFont:{family:'JetBrains Mono',size:9},bodyFont:{family:'JetBrains Mono',size:9},
+      padding:9,
+      callbacks:{label:ctx=>' ৳'+(+ctx.raw||0).toLocaleString('en-BD',{minimumFractionDigits:2})}
+    }
+  },
+  scales:{
+    x:{grid:{color:'rgba(24,32,64,.8)',drawTicks:false},ticks:{color:'#3d4f72',font:{family:'JetBrains Mono',size:7},maxTicksLimit:10},border:{color:'#182040'}},
+    y:{grid:{color:'rgba(24,32,64,.8)',drawTicks:false},ticks:{color:'#3d4f72',font:{family:'JetBrains Mono',size:7},callback:v=>'৳'+fmtN(v)},border:{color:'#182040'}}
+  }
+};
+const LEG={display:true,labels:{color:'#3d4f72',font:{family:'JetBrains Mono',size:8},boxWidth:8,padding:10}};
+let CH={};
+
+function mkLine(id,datasets,opts={}) {
+  const ctx=document.getElementById(id).getContext('2d');
+  CH[id]=new Chart(ctx,{type:'line',data:{labels:[],datasets},options:{...CD,...opts,interaction:{mode:'index',intersect:false},elements:{line:{tension:.4,borderWidth:2},point:{radius:3,hoverRadius:5}},plugins:{...CD.plugins,...(opts.plugins||{})}}});
+}
+function mkBar(id,datasets,opts={}) {
+  const ctx=document.getElementById(id).getContext('2d');
+  CH[id]=new Chart(ctx,{type:'bar',data:{labels:[],datasets},options:{...CD,...opts,plugins:{...CD.plugins,...(opts.plugins||{})}}});
+}
+
+function initCharts() {
+  mkLine('ch-sales',[{label:'Sales',data:[],borderColor:'#3d8bff',backgroundColor:'rgba(61,139,255,.1)',fill:true}]);
+  mkBar('ch-cash',[
+    {label:'Bank',data:[],backgroundColor:'rgba(0,212,164,.55)',borderColor:'rgba(0,212,164,.9)',borderWidth:1},
+    {label:'bKash',data:[],backgroundColor:'rgba(157,95,255,.5)',borderColor:'rgba(157,95,255,.9)',borderWidth:1},
+    {label:'Hand Cash',data:[],backgroundColor:'rgba(26,201,154,.5)',borderColor:'rgba(26,201,154,.9)',borderWidth:1},
+  ],{plugins:{...CD.plugins,legend:LEG},scales:{...CD.scales,x:{...CD.scales.x,stacked:true},y:{...CD.scales.y,stacked:true}}});
+
+  const catDS = EXP_CATS.map(cat=>({
+    label:cat,data:[],
+    backgroundColor:(CAT_CLR[cat]||'#3d8bff')+'90',
+    borderColor:CAT_CLR[cat]||'#3d8bff',borderWidth:1
+  }));
+  mkBar('ch-exp',catDS,{plugins:{...CD.plugins,legend:LEG},scales:{...CD.scales,x:{...CD.scales.x,stacked:true},y:{...CD.scales.y,stacked:true}}});
+
+  mkBar('ch-emp',[
+    {label:'Fixed',data:[],backgroundColor:'rgba(245,162,0,.5)',borderColor:'rgba(245,162,0,.9)',borderWidth:1},
+    {label:'Commission',data:[],backgroundColor:'rgba(255,112,32,.45)',borderColor:'rgba(255,112,32,.9)',borderWidth:1},
+  ],{plugins:{...CD.plugins,legend:LEG}});
+
+  mkLine('ch-fund',   [{label:'Fund',data:[],borderColor:'#00b8d9',backgroundColor:'rgba(0,184,217,.1)',fill:true}]);
+  mkLine('ch-profit', [{label:'Profit',data:[],borderColor:'#9d5fff',backgroundColor:'rgba(157,95,255,.1)',fill:true}]);
+  mkLine('ch-balance',[{label:'Balance',data:[],borderColor:'#ff7020',backgroundColor:'rgba(255,112,32,.1)',fill:true}]);
+  mkLine('ch-settle', [{label:'Settlement',data:[],borderColor:'#ff4040',backgroundColor:'rgba(255,64,64,.1)',fill:true}]);
+}
+
+function updateCharts() {
+  const sorted = filteredTx().sort((a,b)=>a.date.localeCompare(b.date));
+  const labels = sorted.map(t=>t.date);
+  const totalWD= WD.reduce((s,w)=>s+(+w.amount||0),0);
+
+  CH['ch-sales'].data.labels=labels;
+  CH['ch-sales'].data.datasets[0].data=sorted.map(t=>+t.sale||0);
+  CH['ch-sales'].update();
+
+  CH['ch-cash'].data.labels=labels;
+  CH['ch-cash'].data.datasets[0].data=sorted.map(t=>+t.bank||0);
+  CH['ch-cash'].data.datasets[1].data=sorted.map(t=>+t.bkash||0);
+  CH['ch-cash'].data.datasets[2].data=sorted.map(t=>+t.hand||0);
+  CH['ch-cash'].update();
+
+  CH['ch-exp'].data.labels=labels;
+  EXP_CATS.forEach((cat,ci)=>{
+    CH['ch-exp'].data.datasets[ci].data=sorted.map(t=>(t.expCat===cat?(+t.exp||0):0));
+  });
+  // distribute global expenses across timeline (show on each date)
+  // For global expenses, label them on their own date
+  CH['ch-exp'].update();
+
+  CH['ch-emp'].data.labels=labels;
+  CH['ch-emp'].data.datasets[0].data=sorted.map(t=>+t.fixed||0);
+  CH['ch-emp'].data.datasets[1].data=sorted.map(t=>calcTx(t).commission);
+  CH['ch-emp'].update();
+
+  // Declare globalExpChart FIRST before any usage
+  const globalExpChart = EX.reduce((s,e)=>s+(+e.amount||0),0);
+  const gExpPerTx      = globalExpChart / Math.max(1, sorted.length);
+
+  // Fund chart — cumulative
+  let cumF=0;
+  CH['ch-fund'].data.labels=labels;
+  CH['ch-fund'].data.datasets[0].data=sorted.map(t=>{
+    const r  = calcTx(t);
+    const fp = Math.min(100, Math.max(0, +t.fundPct||0));
+    const pbf = r.beforeEmpLoan - gExpPerTx;
+    cumF += Math.max(0, (pbf * fp) / 100);
+    return cumF;
+  });
+  CH['ch-fund'].update();
+
+  // Profit chart — per tx approximation
+  const profits=sorted.map(t=>{
+    const r   = calcTx(t);
+    const fp  = Math.min(100, Math.max(0, +t.fundPct||0));
+    const pbf = r.beforeEmpLoan - gExpPerTx;
+    const fAmt = Math.max(0, (pbf * fp) / 100);
+    return pbf - fAmt;
+  });
+  CH['ch-profit'].data.labels=labels;
+  CH['ch-profit'].data.datasets[0].data=profits;
+  CH['ch-profit'].data.datasets[0].pointBackgroundColor=profits.map(v=>v>=0?'#9d5fff':'#ff4040');
+  CH['ch-profit'].update();
+
+  // Balance chart — cumulative
+  let cumBefore=0;
+  const balData = sorted.map((t,i) => {
+    cumBefore += calcTx(t).beforeEmpLoan;
+    const isLast = (i === sorted.length - 1);
+    const expD   = isLast ? globalExpChart : 0;
+    const profitBeforeFundSoFar = cumBefore - expD;
+    const avgFpct = sorted.slice(0,i+1).reduce((s,tx)=>s+(+tx.fundPct||0),0) / (i+1);
+    const fundD   = isLast ? Math.max(0,(profitBeforeFundSoFar*avgFpct)/100) : 0;
+    return prevBal + profitBeforeFundSoFar - fundD - totalWD;
+  });
+  CH['ch-balance'].data.labels=labels;
+  CH['ch-balance'].data.datasets[0].data=balData;
+  CH['ch-balance'].data.datasets[0].pointBackgroundColor=balData.map(v=>v>=0?'#ff7020':'#ff4040');
+  CH['ch-balance'].update();
+
+  const settleData=sorted.map(t=>calcTx(t).settleDiff);
+  CH['ch-settle'].data.labels=labels;
+  CH['ch-settle'].data.datasets[0].data=settleData;
+  CH['ch-settle'].data.datasets[0].pointBackgroundColor=settleData.map(v=>v>0?'#ff4040':v<0?'#00d4a4':'#3d4f72');
+  CH['ch-settle'].update();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER ALL
+═══════════════════════════════════════════════════════════ */
+function render() { renderCards(); renderTable(); updateCharts(); }
+
+/* ═══════════════════════════════════════════════════════════
+   PDF EXPORT — BANK STATEMENT STYLE
+═══════════════════════════════════════════════════════════ */
+async function exportPDF() {
+  toast('PDF building...','tw');
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const PW = doc.internal.pageSize.getWidth();
+  const PH = doc.internal.pageSize.getHeight();
+  const ML = 18, MR = 18;
+  const CW = PW - ML - MR;
+
+  /* DATA */
+  const tx       = filteredTx();
+  const a        = aggTx(tx);
+  const expA     = aggExp(EX);
+  const totalWD  = WD.reduce((s,w) => s + (+w.amount||0), 0);
+  const totalFU  = FU.reduce((s,f) => s + (+f.amount||0), 0);
+  const fundBal  = Math.max(0, a.fund - totalFU);
+  // a.profit already has globalExp deducted
+  const finBal   = prevBal + a.profit - totalWD;
+  const grandTot = finBal + fundBal;
+  const totalAllExp = a.txExpTotal + expA.total; // for display
+  const catTotals   = getCombinedCatTotals();
+
+  /* Use BDT prefix instead of BDT symbol to avoid encoding issues */
+  const money = n => 'BDT ' + (+n||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const sign  = n => (n >= 0 ? '+' : '-') + ' BDT ' + Math.abs(+n||0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  /* COLORS */
+  const C = {
+    black:  [20,  22,  28 ],
+    dgrey:  [70,  75,  88 ],
+    grey:   [120, 125, 138],
+    lgrey:  [185, 188, 196],
+    line:   [215, 218, 224],
+    vline:  [180, 183, 192],
+    white:  [255, 255, 255],
+    teal:   [0,   115,  92 ],
+    blue:   [25,   85, 185 ],
+    green:  [10,  120,  70 ],
+    red:    [185,  30,  30 ],
+    amber:  [155,  90,   0 ],
+    orange: [168,  68,   0 ],
+    cyan:   [0,   100, 148 ],
+    purple: [95,   48, 175 ],
+  };
+
+  let Y = 0;
+  let pageNum = 0;
+
+  /* PAGE SETUP */
+  function newPageSetup() {
+    pageNum++;
+    doc.setFillColor(...C.white);
+    doc.rect(0, 0, PW, PH, 'F');
+    Y = (pageNum === 1) ? 0 : 16;
+  }
+
+  function checkY(need) {
+    if (Y + need > PH - 16) {
+      drawFooter();
+      doc.addPage();
+      newPageSetup();
+      doc.setFontSize(7.5); doc.setFont(undefined,'italic');
+      doc.setTextColor(...C.lgrey);
+      doc.text('...continued from previous page', PW - MR, Y, { align:'right' });
+      Y += 6;
+    }
+  }
+
+  function drawFooter() {
+    doc.setDrawColor(...C.line); doc.setLineWidth(0.25);
+    doc.line(ML, PH - 11, PW - MR, PH - 11);
+    doc.setFontSize(7); doc.setFont(undefined,'normal');
+    doc.setTextColor(...C.lgrey);
+    doc.text('BizTrack Ultimate ERP  |  Confidential Business Finance Statement', ML, PH - 6);
+    doc.text('Page ' + pageNum, PW - MR, PH - 6, { align:'right' });
+  }
+
+  /* ROW HELPERS — two-column: label left, value right */
+  function secTitle(num, label) {
+    checkY(14);
+    Y += 2;
+    doc.setFontSize(9.5); doc.setFont(undefined,'bold');
+    doc.setTextColor(...C.teal);
+    doc.text(num + '.  ' + label, ML, Y);
+    Y += 1.5;
+    doc.setDrawColor(...C.teal); doc.setLineWidth(0.4);
+    doc.line(ML, Y, PW - MR, Y);
+    Y += 5;
+  }
+
+  function dataRow(label, value, valColor, bold) {
+    checkY(6.5);
+    const lColor = bold ? C.dgrey : C.grey;
+    doc.setFontSize(9); doc.setFont(undefined, bold ? 'bold' : 'normal');
+    doc.setTextColor(...lColor);
+    doc.text(label, ML + 3, Y);
+    doc.setTextColor(...(valColor || C.black));
+    doc.setFont(undefined, bold ? 'bold' : 'normal');
+    doc.text(value, PW - MR, Y, { align:'right' });
+    Y += 6;
+  }
+
+  function indentRow(label, value, valColor) {
+    checkY(6);
+    doc.setFontSize(8.5); doc.setFont(undefined,'normal');
+    doc.setTextColor(...C.lgrey);
+    doc.text(label, ML + 8, Y);
+    doc.setTextColor(...(valColor || C.grey));
+    doc.text(value, PW - MR, Y, { align:'right' });
+    Y += 5.5;
+  }
+
+  function totalRow(label, value, valColor) {
+    checkY(8);
+    Y += 1;
+    doc.setDrawColor(...C.vline); doc.setLineWidth(0.2);
+    doc.line(ML + 3, Y - 0.5, PW - MR, Y - 0.5);
+    Y += 2;
+    doc.setFontSize(9); doc.setFont(undefined,'bold');
+    doc.setTextColor(...C.dgrey);
+    doc.text(label, ML + 3, Y);
+    doc.setTextColor(...(valColor || C.black));
+    doc.text(value, PW - MR, Y, { align:'right' });
+    Y += 7;
+  }
+
+  function logEntry(i, date, desc, value, valColor) {
+    checkY(6);
+    doc.setFontSize(8); doc.setFont(undefined,'normal');
+    doc.setTextColor(...C.lgrey);
+    doc.text(String(i) + '.', ML + 6, Y);
+    doc.setTextColor(...C.grey);
+    doc.text(date, ML + 11, Y);
+    const maxW = CW - 48;
+    const clipped = doc.splitTextToSize(desc, maxW)[0] || desc;
+    doc.text(clipped, ML + 28, Y);
+    doc.setTextColor(...(valColor || C.grey));
+    doc.text(value, PW - MR, Y, { align:'right' });
+    Y += 5.2;
+  }
+
+  function thinDiv() {
+    checkY(5);
+    doc.setDrawColor(...C.line); doc.setLineWidth(0.2);
+    doc.line(ML, Y, PW - MR, Y);
+    Y += 4;
+  }
+
+  function space(n) { Y += (n || 4); }
+
+  function logHeader(label) {
+    checkY(8);
+    doc.setFontSize(8); doc.setFont(undefined,'bold');
+    doc.setTextColor(...C.lgrey);
+    doc.text(label, ML + 5, Y);
+    Y += 5;
+  }
+
+  /* =====================================================
+     PAGE 1 — COVER HEADER
+  ===================================================== */
+  newPageSetup();
+
+  /* Top bar */
+  doc.setFillColor(...C.teal);
+  doc.rect(0, 0, PW, 32, 'F');
+
+  doc.setFontSize(20); doc.setFont(undefined,'bold');
+  doc.setTextColor(...C.white);
+  doc.text('BizTrack Ultimate ERP', ML, 13);
+
+  doc.setFontSize(9); doc.setFont(undefined,'normal');
+  doc.setTextColor(200, 238, 228);
+  doc.text('Business Finance Statement', ML, 20);
+  doc.text('Professional Accounting Report', ML, 26);
+
+  doc.setFontSize(8); doc.setTextColor(200, 238, 228);
+  const genDate = new Date().toLocaleDateString('en-GB');
+  doc.text('Generated: ' + genDate, PW - MR, 14, { align:'right' });
+  doc.text('Transactions: ' + tx.length + '   Expenses: ' + EX.length, PW - MR, 20, { align:'right' });
+
+  Y = 38;
+
+  /* ── Date Filter Info Box ── */
+  const isFiltered = !!(fFrom || fTo);
+  const periodFrom = fFrom || 'All Time';
+  const periodTo   = fTo   || 'Present';
+  const periodLabel = isFiltered
+    ? 'From: ' + periodFrom + '   To: ' + periodTo
+    : 'All Time (No Date Filter Applied)';
+
+  // Highlight box for date range
+  doc.setFillColor(isFiltered ? 232 : 240, isFiltered ? 248 : 242, isFiltered ? 244 : 236);
+  doc.roundedRect(ML, Y, CW, 11, 1.5, 1.5, 'F');
+  doc.setDrawColor(...(isFiltered ? C.teal : C.lgrey));
+  doc.setLineWidth(0.4);
+  doc.roundedRect(ML, Y, CW, 11, 1.5, 1.5, 'S');
+
+  doc.setFontSize(8); doc.setFont(undefined, 'bold');
+  doc.setTextColor(...(isFiltered ? C.teal : C.grey));
+  doc.text('Report Period:', ML + 4, Y + 7);
+  doc.setFont(undefined, 'normal');
+  doc.setTextColor(...C.black);
+  doc.text(periodLabel, ML + 34, Y + 7);
+
+  if (isFiltered) {
+    const d1 = fFrom ? new Date(fFrom) : null;
+    const d2 = fTo   ? new Date(fTo)   : new Date();
+    if (d1 && d2) {
+      const days = Math.round((d2 - d1) / (1000*60*60*24)) + 1;
+      doc.setFontSize(7); doc.setTextColor(...C.grey);
+      doc.text('(' + days + ' days)', PW - MR, Y + 7, { align:'right' });
+    }
+  }
+
+  Y += 17;
+
+  /* =====================================================
+     SECTION 1 — OPENING BALANCE
+  ===================================================== */
+  secTitle('1', 'Opening Balance');
+  dataRow('Previous / Opening Balance', money(prevBal), C.teal, true);
+  thinDiv();
+
+  /* =====================================================
+     SECTION 2 — SALES
+  ===================================================== */
+  secTitle('2', 'Sales Summary');
+  dataRow('Total Sale Amount', money(a.sale), C.blue, true);
+  indentRow('Number of transactions', String(tx.length));
+  if (tx.length) {
+    const maxSale = Math.max(...tx.map(t => +t.sale||0));
+    indentRow('Largest single sale', money(maxSale), C.blue);
+    indentRow('Average per transaction', money(a.sale / tx.length), C.blue);
+  }
+  thinDiv();
+
+  /* =====================================================
+     SECTION 3 — CASH FLOW
+  ===================================================== */
+  secTitle('3', 'Cash Flow');
+  dataRow('Bank Received', money(a.bank), C.black);
+  dataRow('bKash / Online Received', money(a.bkash), C.black);
+  dataRow('Hand Cash Collection', money(a.hand), C.black);
+  totalRow('Total Cash In', money(a.cash), C.teal);
+  const stLabel = a.settle > 0 ? 'Settlement Difference  (uncollected)'
+                : a.settle < 0 ? 'Settlement Difference  (over-received)'
+                : 'Settlement Difference  (fully settled)';
+  const stColor = a.settle > 0 ? C.red : a.settle < 0 ? C.green : C.lgrey;
+  dataRow(stLabel, money(a.settle), stColor);
+  thinDiv();
+
+  /* =====================================================
+     SECTION 4 — COGS
+  ===================================================== */
+  secTitle('4', 'COGS — Cost of Goods Sold');
+  dataRow('Total Paid for Raw Items / Materials', money(a.cogs), C.orange, true);
+  thinDiv();
+
+  /* =====================================================
+     SECTION 5 — EXPENSES
+  ===================================================== */
+  secTitle('5', 'Expenses');
+  dataRow('Transaction-level Expenses', money(a.txExpTotal), C.red);
+  dataRow('Standalone Expense Entries', money(expA.total), C.red);
+  totalRow('Total Expenses', money(totalAllExp), C.red);
+  const catArr = Object.entries(catTotals).filter(([,v]) => v > 0);
+  if (catArr.length) {
+    logHeader('Category Breakdown:');
+    catArr.forEach(([cat, amt]) => indentRow(cat, money(amt), C.red));
+  }
+  thinDiv();
+
+  /* =====================================================
+     SECTION 6 — EMPLOYEE COST
+  ===================================================== */
+  secTitle('6', 'Employee Cost');
+  const empMap = {};
+  tx.forEach(t => {
+    const n = t.empName || 'Unnamed';
+    if (!empMap[n]) empMap[n] = { fixed:0, comm:0 };
+    empMap[n].fixed += +t.fixed || 0;
+    empMap[n].comm  += calcTx(t).commission;
+  });
+  Object.entries(empMap).forEach(([name, v]) => {
+    checkY(18);
+    doc.setFontSize(8.5); doc.setFont(undefined,'bold');
+    doc.setTextColor(...C.amber);
+    doc.text(name, ML + 3, Y); Y += 5.5;
+    doc.setFont(undefined,'normal');
+    indentRow('Fixed Salary', money(v.fixed), C.amber);
+    indentRow('Commission', money(v.comm), C.amber);
+  });
+  totalRow('Total Employee Cost', money(a.empCost), C.amber);
+  thinDiv();
+
+  /* =====================================================
+     SECTION 7 — LOAN
+  ===================================================== */
+  secTitle('7', 'Loan');
+  dataRow('Total Loan Deducted from Profit', money(a.loan), C.red, true);
+  thinDiv();
+
+  /* =====================================================
+     SECTION 8 — FUND / RESERVE
+  ===================================================== */
+  secTitle('8', 'Fund / Reserve');
+  dataRow('Total Fund Reserved', money(a.fund), C.cyan, true);
+  dataRow('Total Fund Used', money(totalFU), C.grey);
+  totalRow('Fund Balance Remaining', money(fundBal), C.cyan);
+  if (FU.length) {
+    logHeader('Fund Usage Log:');
+    FU.forEach((f, i) => logEntry(i+1, f.date, f.reason, '- ' + money(f.amount), C.cyan));
+  }
+  thinDiv();
+
+  /* =====================================================
+     SECTION 9 — WITHDRAWALS
+  ===================================================== */
+  secTitle('9', 'Withdrawals');
+  dataRow('Total Amount Withdrawn', money(totalWD), C.orange, true);
+  if (WD.length) {
+    logHeader('Withdrawal Log:');
+    WD.forEach((w, i) => logEntry(i+1, w.date, w.reason, '- ' + money(w.amount), C.orange));
+  }
+  thinDiv();
+
+  /* =====================================================
+     SECTION 10 — FINANCIAL SUMMARY
+  ===================================================== */
+  secTitle('10', 'Financial Summary');
+
+  // Correct order: CashIn - COGS - TxExp - EmpCost - Loan - GlobalExp = beforeFund
+  const afterCogs    = a.cash - a.cogs;
+  const afterTxExp   = afterCogs - a.txExpTotal;
+  const afterEmp     = afterTxExp - a.empCost;
+  const afterLoan    = afterEmp - a.loan;
+  const afterCatExp  = afterLoan - a.globalExp;  // globalExp deducted here
+  const grossP       = afterCatExp;              // profit before fund
+
+  dataRow('Cash In', money(a.cash), C.black);
+  indentRow('(-) COGS', money(a.cogs), C.dgrey);
+  indentRow('(-) Transaction Expenses', money(a.txExpTotal), C.dgrey);
+  indentRow('(-) Employee Cost', money(a.empCost), C.dgrey);
+  indentRow('(-) Loan', money(a.loan), C.dgrey);
+  indentRow('(-) Category Expenses', money(a.globalExp), C.dgrey);
+  indentRow('= Profit Before Fund', money(grossP), C.teal);
+  indentRow('(-) Fund Reserved', money(a.fund), C.grey);
+
+  space(2);
+  const npColor = a.profit >= 0 ? C.green : C.red;
+  totalRow('Net Profit', money(a.profit), npColor);
+
+  dataRow('(+) Previous Balance', money(prevBal), C.teal);
+  dataRow('(-) Total Withdrawn', money(totalWD), C.red);
+
+  space(2);
+  const fbColor = finBal >= 0 ? C.blue : C.red;
+  totalRow('Final Balance  (without Fund)', money(finBal), fbColor);
+
+  dataRow('(+) Remaining Fund', money(fundBal), C.cyan);
+
+  /* GRAND TOTAL — double underline */
+  checkY(14);
+  space(3);
+  doc.setDrawColor(...C.teal); doc.setLineWidth(0.5);
+  doc.line(ML, Y, PW - MR, Y); Y += 1.2;
+  doc.line(ML, Y, PW - MR, Y); Y += 4;
+
+  doc.setFontSize(11); doc.setFont(undefined,'bold');
+  doc.setTextColor(...C.teal);
+  doc.text('GRAND TOTAL BALANCE', ML + 2, Y);
+  doc.setTextColor(...(grandTot >= 0 ? C.teal : C.red));
+  doc.text(money(grandTot), PW - MR, Y, { align:'right' });
+  Y += 2;
+
+  doc.setDrawColor(...C.teal); doc.setLineWidth(0.5);
+  doc.line(ML, Y, PW - MR, Y); Y += 1;
+  doc.line(ML, Y, PW - MR, Y);
+
+  /* FOOTERS — every page */
+  drawFooter();
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    doc.setDrawColor(...C.line); doc.setLineWidth(0.25);
+    doc.line(ML, PH - 11, PW - MR, PH - 11);
+    doc.setFontSize(7); doc.setFont(undefined,'normal');
+    doc.setTextColor(...C.lgrey);
+    doc.text('BizTrack Ultimate ERP  |  Confidential Business Finance Statement', ML, PH - 6);
+    doc.text('Page ' + p + ' of ' + totalPages, PW - MR, PH - 6, { align:'right' });
+  }
+
+  doc.save('BizTrack_Statement_' + today() + '.pdf');
+  toast('PDF exported successfully');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXCEL EXPORT — 5 SHEETS
+═══════════════════════════════════════════════════════════ */
+function exportExcel() {
+  toast('📊 Building Excel…','tw');
+  try {
+    const wb = XLSX.utils.book_new();
+    const tx=filteredTx(), a=aggTx(tx), expA=aggExp(EX);
+    const totalWD=WD.reduce((s,w)=>s+(+w.amount||0),0);
+    const totalFU=FU.reduce((s,f)=>s+(+f.amount||0),0);
+    const fundBal=Math.max(0,a.fund-totalFU);
+    // a.profit already has globalExp deducted
+  const finBal=prevBal+a.profit-totalWD;
+    const grandTotal=finBal+fundBal;
+
+    // ── Sheet 1: Dashboard Summary ──
+    const sumData=[
+      ['BizTrack Ultimate ERP — Dashboard Summary'],[''],
+      ['Generated',new Date().toLocaleString('en-BD')],
+      ['Period',`${fFrom||'All Time'} → ${fTo||'Present'}`],
+      ['Transactions',tx.length],[''],
+      ['METRIC','AMOUNT (৳)'],
+      ['Previous Balance', prevBal],
+      ['Total Sales', a.sale],
+      ['Total Cash In', a.cash],
+      ['  Bank', a.bank],['  bKash', a.bkash],['  Hand Cash', a.hand],
+      ['COGS (Raw Items)', a.cogs],
+      ['Total Expenses', expA.total],
+      ...Object.entries(expA.byCat).map(([c,v])=>[`  ${c}`,v]),
+      ['Employee Cost', a.empCost],
+      ['Total Loan', a.loan],
+      ['Fund Reserved', a.fund],
+      ['Fund Used', totalFU],
+      ['Fund Balance', fundBal],
+      ['Net Profit', a.profit],
+      ['Total Withdrawn', totalWD],
+      ['Final Balance (without fund)', finBal],
+      ['GRAND TOTAL BALANCE', grandTotal],
+      ['Settlement Difference', a.settle],
+    ];
+    const ws1=XLSX.utils.aoa_to_sheet(sumData);
+    ws1['!cols']=[{wch:32},{wch:20}];
+    XLSX.utils.book_append_sheet(wb,ws1,'Dashboard Summary');
+
+    // ── Sheet 2: Transactions ──
+    const txHeaders=['#','Date','Note','Employee','Sale ৳','Bank ৳','bKash ৳','Hand Cash ৳','Cash In ৳','COGS ৳','Fixed ৳','Comm %','Emp Cost ৳','Loan ৳','Fund %','Fund Amt ৳','Net Profit ৳','Settlement ৳'];
+    const txRows=tx.map((t,i)=>{
+      const r=calcTx(t);
+      const fpXL  = Math.min(100,Math.max(0,+t.fundPct||0));
+      const pbfXL = r.beforeEmpLoan;
+      const faXL  = Math.max(0,(pbfXL*fpXL)/100);
+      const npXL  = pbfXL - faXL;
+      return [i+1,t.date,t.note||'',t.empName||'',+t.sale||0,+t.bank||0,+t.bkash||0,+t.hand||0,r.cashIn,+t.cogs||0,+t.fixed||0,+t.comm||0,r.empCost,+t.loan||0,fpXL,faXL,npXL,r.settleDiff];
+    });
+    const ws2=XLSX.utils.aoa_to_sheet([txHeaders,...txRows]);
+    ws2['!cols']=txHeaders.map((_,i)=>({wch:i<3?18:14}));
+    XLSX.utils.book_append_sheet(wb,ws2,'Transactions');
+
+    // ── Sheet 3: Expenses ──
+    const expHeaders=['#','Date','Category','Purpose / Note','Amount ৳'];
+    const expRows=EX.map((e,i)=>[i+1,e.date,e.cat,e.note,+e.amount||0]);
+    const ws3=XLSX.utils.aoa_to_sheet([expHeaders,...expRows,['','','','Total',expA.total]]);
+    ws3['!cols']=[{wch:6},{wch:12},{wch:16},{wch:30},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws3,'Expenses');
+
+    // ── Sheet 4: Withdrawals ──
+    const wdHeaders=['#','Date','Purpose','Amount ৳'];
+    const wdRows=WD.map((w,i)=>[i+1,w.date,w.reason,+w.amount||0]);
+    const ws4=XLSX.utils.aoa_to_sheet([wdHeaders,...wdRows,['','','Total',totalWD]]);
+    ws4['!cols']=[{wch:6},{wch:12},{wch:28},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws4,'Withdrawals');
+
+    // ── Sheet 5: Fund Usage ──
+    const fuHeaders=['#','Date','Purpose','Amount ৳'];
+    const fuRows=FU.map((f,i)=>[i+1,f.date,f.reason,+f.amount||0]);
+    const totalFuAmt=FU.reduce((s,f)=>s+(+f.amount||0),0);
+    const ws5=XLSX.utils.aoa_to_sheet([fuHeaders,...fuRows,['','','Total Used',totalFuAmt],['','','Fund Balance',fundBal]]);
+    ws5['!cols']=[{wch:6},{wch:12},{wch:28},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws5,'Fund Usage');
+
+    XLSX.writeFile(wb,`BizTrack_Ultimate_Report_${today()}.xlsx`);
+    toast('✓ Excel exported (5 sheets)');
+  } catch(e) {
+    console.error(e);
+    toast('⚠ Excel export failed','te');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORT DROPDOWN
+═══════════════════════════════════════════════════════════ */
+function toggleExport(e) {
+  e.stopPropagation();
+  document.getElementById('exportDrop').classList.toggle('open');
+}
+function closeExport() { document.getElementById('exportDrop').classList.remove('open'); }
+document.addEventListener('click', closeExport);
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════ */
+function cloneAsNewInstance() {
+  if (!confirm(
+    'একটি নতুন স্বাধীন কপি তৈরি করবেন?\n\n' +
+    'নতুন ফাইলে সম্পূর্ণ আলাদা data থাকবে।\n' +
+    'এই ফাইলের data অপরিবর্তিত থাকবে।'
+  )) return;
+
+  // Generate new unique ID
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let newId = 'btu_';
+  for (let i = 0; i < 20; i++) newId += chars[Math.floor(Math.random() * chars.length)];
+
+  // Read the DOM's current HTML (works for local files, no fetch needed)
+  const currentHtml = document.documentElement.outerHTML;
+
+  // Replace the INST constant with the new ID
+  const newHtml = currentHtml.replace(
+    /const INST = 'btu_[a-z0-9_]+';/,
+    "const INST = '" + newId + "';"
+  );
+
+  // Download the modified file
+  const blob = new Blob([newHtml], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'BizTrack_Copy_' + new Date().toISOString().slice(0,10) + '.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+
+  toast('✓ নতুন কপি download হচ্ছে — আলাদা data থাকবে');
+}
+
+let toastTmr;
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast on'+(type==='te'?' te':type==='tw'?' tw':'');
+  clearTimeout(toastTmr);
+  toastTmr=setTimeout(()=>t.className='toast',3200);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  const t=today();
+  document.getElementById('tf-date').value=t;
+  document.getElementById('ef-date').value=t;
+  document.getElementById('wf-date').value=t;
+  document.getElementById('ff-date').value=t;
+
+  // Block mouse wheel on all number inputs
+  document.addEventListener('wheel',e=>{
+    if(document.activeElement&&document.activeElement.type==='number'){
+      e.preventDefault();
+      document.activeElement.blur();
+    }
+  },{passive:false});
+
+  loadPrevBalInput();
+  initCharts();
+  renderExpList();
+  renderWdList();
+  renderFuList();
+  render();
+  lp();
+});
+</script>
+
+
+</body></html>
