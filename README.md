@@ -1,4 +1,4 @@
-# 🚀 BizTrack Ultimate – ERP Finance & Business Management System
+# 📜 BizTrack Ultimate – ERP Finance & Business Management System
 
 A fully offline, browser-based ERP dashboard designed for finance tracking, transaction management, business analytics, and reporting — all inside a single HTML file.
 
