@@ -177,4 +177,5 @@ Each ERP file instance has:
 - Portable business management solution
 
 ---
-## ✨Special Credit: Claude AI
+## ✨Special Credit: 
+For Explainatoion: ## Claude AI
