@@ -463,6 +463,30 @@ select.fi { cursor: pointer; }
 .prev-bal-panel label { font-family: var(--mo); font-size: 9px; color: var(--mu); white-space: nowrap; text-transform: uppercase; letter-spacing: 1px; }
 .prev-bal-panel input { max-width: 200px; margin-bottom: 0; }
 
+/* Business Name Panel */
+.biz-name-panel {
+  background: var(--sf2); border: 1px solid var(--bd2);
+  border-radius: 12px; padding: 14px 20px;
+  margin-bottom: 16px; display: flex; align-items: center;
+  gap: 16px; flex-wrap: wrap;
+}
+.biz-name-display {
+  display: flex; flex-direction: column; gap: 1px;
+  min-width: 160px;
+}
+.biz-name-label {
+  font-size: 9px; color: var(--mu); font-family: var(--mo);
+  text-transform: uppercase; letter-spacing: 1.5px;
+}
+.biz-name-value {
+  font-size: 22px; font-weight: 800; color: var(--gr);
+  letter-spacing: -.5px; font-family: var(--fn);
+  transition: all .2s; min-height: 28px;
+}
+.biz-name-value.empty { color: var(--mu); font-size: 14px; font-weight: 400; font-style: italic; }
+.biz-name-input-wrap { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 220px; }
+.biz-name-input-wrap label { font-size: 9px; color: var(--mu); font-family: var(--mo); text-transform: uppercase; letter-spacing: 1px; }
+
 footer { border-top: 1px solid var(--bd); padding: 14px 0; text-align: center; font-family: var(--mo); font-size: 9px; color: var(--mu); margin-top: 8px; }
 </style>
 </head>
@@ -512,6 +536,24 @@ footer { border-top: 1px solid var(--bd); padding: 14px 0; text-align: center; f
   <input type="date" id="fTo" onchange="applyFilter()">
   <button class="btn btn-ghost btn-sm" onclick="clearFilter()">✕ All Time</button>
   <span class="f-chip" id="fChip">🔍 Filtered</span>
+</div>
+
+<!-- ═══ BUSINESS NAME ═══ -->
+<div class="biz-name-panel fade-in">
+  <div class="biz-name-display">
+    <div class="biz-name-label">Your Business</div>
+    <div class="biz-name-value empty" id="bizNameDisplay">Your Business Name</div>
+  </div>
+  <div class="biz-name-input-wrap">
+    <label>Business Name (shown in dashboard & PDF)</label>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input class="fi" type="text" id="bizNameInput"
+        placeholder="e.g. Pico Robotics, ABC Shop…"
+        style="margin-bottom:0;"
+        oninput="updateBizName()">
+      <button class="btn btn-gr btn-sm" onclick="saveBizName();toast('✓ Business name saved');">Save</button>
+    </div>
+  </div>
 </div>
 
 <!-- ═══ PREVIOUS BALANCE ═══ -->
@@ -837,6 +879,7 @@ const K = {
   wd:  INST + '_wd',
   fu:  INST + '_fu',
   pb:  INST + '_pb',
+  bn:  INST + '_bn',  // business name
 };
 
 const ld  = k => { try { return JSON.parse(localStorage.getItem(k)) || []; } catch { return []; } };
@@ -866,6 +909,33 @@ const CAT_CLR = {
 /* ═══════════════════════════════════════════════════════════
    PREVIOUS BALANCE
 ═══════════════════════════════════════════════════════════ */
+let bizName = localStorage.getItem(K.bn) || '';
+
+function saveBizName() {
+  bizName = document.getElementById('bizNameInput').value.trim();
+  localStorage.setItem(K.bn, bizName);
+  updateBizName();
+}
+function updateBizName() {
+  const val = document.getElementById('bizNameInput').value.trim();
+  const disp = document.getElementById('bizNameDisplay');
+  if (val) {
+    disp.textContent = val;
+    disp.classList.remove('empty');
+  } else {
+    disp.textContent = 'Your Business Name';
+    disp.classList.add('empty');
+  }
+}
+function loadBizNameInput() {
+  document.getElementById('bizNameInput').value = bizName || '';
+  updateBizName();
+  if (bizName) {
+    document.getElementById('bizNameDisplay').textContent = bizName;
+    document.getElementById('bizNameDisplay').classList.remove('empty');
+  }
+}
+
 function savePrevBal() {
   prevBal = parseFloat(document.getElementById('prevBalInput').value) || 0;
   localStorage.setItem(K.pb, prevBal);
@@ -1673,7 +1743,8 @@ async function exportPDF() {
     doc.line(ML, PH - 11, PW - MR, PH - 11);
     doc.setFontSize(7); doc.setFont(undefined,'normal');
     doc.setTextColor(...C.lgrey);
-    doc.text('BizTrack Ultimate ERP  |  Confidential Business Finance Statement', ML, PH - 6);
+    const footerName = bizName ? bizName + '  |  ' : '';
+    doc.text(footerName + 'BizTrack ERP  |  Confidential Business Finance Statement', ML, PH - 6);
     doc.text('Page ' + pageNum, PW - MR, PH - 6, { align:'right' });
   }
 
@@ -1767,14 +1838,30 @@ async function exportPDF() {
   doc.setFillColor(...C.teal);
   doc.rect(0, 0, PW, 32, 'F');
 
-  doc.setFontSize(20); doc.setFont(undefined,'bold');
-  doc.setTextColor(...C.white);
-  doc.text('BizTrack Ultimate ERP', ML, 13);
+  // Business name in PDF header
+  const pdfBizName = bizName || 'BizTrack Ultimate ERP';
+  const hasBizName = !!bizName;
 
-  doc.setFontSize(9); doc.setFont(undefined,'normal');
-  doc.setTextColor(200, 238, 228);
-  doc.text('Business Finance Statement', ML, 20);
-  doc.text('Professional Accounting Report', ML, 26);
+  if (hasBizName) {
+    // Show business name large + subtitle small
+    doc.setFontSize(9); doc.setFont(undefined,'normal');
+    doc.setTextColor(200, 238, 228);
+    doc.text('Your Business', ML, 9);
+    doc.setFontSize(22); doc.setFont(undefined,'bold');
+    doc.setTextColor(...C.white);
+    doc.text(pdfBizName, ML, 18);
+    doc.setFontSize(8); doc.setFont(undefined,'normal');
+    doc.setTextColor(200, 238, 228);
+    doc.text('Business Finance Statement  |  BizTrack Ultimate ERP', ML, 25);
+  } else {
+    doc.setFontSize(20); doc.setFont(undefined,'bold');
+    doc.setTextColor(...C.white);
+    doc.text('BizTrack Ultimate ERP', ML, 13);
+    doc.setFontSize(9); doc.setFont(undefined,'normal');
+    doc.setTextColor(200, 238, 228);
+    doc.text('Business Finance Statement', ML, 20);
+    doc.text('Professional Accounting Report', ML, 26);
+  }
 
   doc.setFontSize(8); doc.setTextColor(200, 238, 228);
   const genDate = new Date().toLocaleDateString('en-GB');
@@ -1989,7 +2076,8 @@ async function exportPDF() {
     doc.line(ML, PH - 11, PW - MR, PH - 11);
     doc.setFontSize(7); doc.setFont(undefined,'normal');
     doc.setTextColor(...C.lgrey);
-    doc.text('BizTrack Ultimate ERP  |  Confidential Business Finance Statement', ML, PH - 6);
+    const footerName = bizName ? bizName + '  |  ' : '';
+    doc.text(footerName + 'BizTrack ERP  |  Confidential Business Finance Statement', ML, PH - 6);
     doc.text('Page ' + p + ' of ' + totalPages, PW - MR, PH - 6, { align:'right' });
   }
 
@@ -2014,7 +2102,9 @@ function exportExcel() {
 
     // ── Sheet 1: Dashboard Summary ──
     const sumData=[
-      ['BizTrack Ultimate ERP — Dashboard Summary'],[''],
+      [bizName ? bizName + ' — Business Finance Report' : 'BizTrack Ultimate ERP — Dashboard Summary'],
+      bizName ? ['Powered by BizTrack Ultimate ERP'] : [],
+      [''],
       ['Generated',new Date().toLocaleString('en-BD')],
       ['Period',`${fFrom||'All Time'} → ${fTo||'Present'}`],
       ['Transactions',tx.length],[''],
@@ -2159,6 +2249,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   },{passive:false});
 
+  loadBizNameInput();
   loadPrevBalInput();
   initCharts();
   renderExpList();
